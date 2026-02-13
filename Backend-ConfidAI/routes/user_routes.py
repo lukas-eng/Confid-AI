@@ -5,6 +5,8 @@ from controllers.user_controller import registrar_usuario
 from config.database import SessionLocal
 from services.jwt_service import verificar_token
 from fastapi import Depends
+from schemas.user_schema import UserUpdate
+from controllers.user_controller import actualizar_usuario
 
 
 router = APIRouter()
@@ -26,3 +28,12 @@ def perfil_usuario(token_data: dict = Depends(verificar_token)):
         "mensaje": "Acceso autorizado",
         "token_data": token_data
     }
+
+@router.put("/perfil")
+def editar_perfil(
+    datos: UserUpdate,
+    token_data: dict = Depends(verificar_token),
+    db: Session = Depends(get_db)
+):
+    user_id = token_data["id"]  # depende de cómo guardes el token
+    return actualizar_usuario(db, user_id, datos)
