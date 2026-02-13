@@ -1,0 +1,17 @@
+.avatar {
+  width: 150px;
+  height: 150px;
+  background: url("https://img.freepik.com/vector-gratis/ilustracion-joven-sonriente_1308-174669.jpg?semt=ais_user_personalization&w=740&q=80") center/cover;
+}
+
+.avatar.hablando {
+  animation: boca 0.3s infinite alternate;
+}
+
+@keyframes boca {
+  from { transform: scaleY(1); }
+  to { transform: scaleY(1.05); }
+}
+.video{
+    width: 100%;
+}

@@ -43,7 +43,7 @@ const FormuRegis = () => {
     <div className='contenedorformu'>
 
       <ElectricBorder
-        color="#7df9ff"
+        color="#7dffe3"
         speed={1}
         chaos={0.12}
         thickness={2}
@@ -105,8 +105,8 @@ const FormuRegis = () => {
             </div>
 
             <div className='contenedorbtn'>
-              <button type="submit">Registrarse</button>
-              <button type="button" onClick={irInicio}>
+              <button className='inicio' type="submit">Registrarse</button>
+              <button className='inicio' type="button" onClick={irInicio}>
                 Iniciar sesión
               </button>
             </div>

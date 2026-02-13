@@ -1,0 +1,82 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+.pagina-resultados {
+  background: linear-gradient(135deg, #2a8cdb 0%, #1689e7 100%);
+  min-height: 100vh;
+  padding: 30px 40px 40px;
+}
+.resultados-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.resultados {
+  font-size: 28px;
+  color:white;
+}
+.botonreporte {
+  padding: 10px 20px;
+  background-color: #3007e4;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.numero{
+  color: #2df2c5;
+}
+.botonreporte:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+.resultados-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+.card {
+  background-color: rgba(255, 255, 255, 0.904);
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+.card h3 {
+  font-size: 16px;
+  color: #4a5568;
+  margin-bottom: 10px;
+}
+.card h1 {
+  font-size: 36px;
+  color: #667eea;
+  margin-bottom: 10px;
+}
+.card p,
+.card li {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+}
+.card ul {
+  padding-left: 18px;
+}
+.seccion {
+  margin-top: 25px;
+}
+@media (max-width: 768px) {
+  .pagina-resultados {
+    padding: 90px 20px 20px;
+  }
+  .botonreporte {
+    font-size: 16px;
+  }
+  .resultados {
+    font-size: 22px;
+  }
+}
