@@ -1,5 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import "../Style/EditarPerfil.css";
+
+
 
 const EyeIcon = ({ open }) =>
   open ? (
@@ -16,7 +18,7 @@ const EyeIcon = ({ open }) =>
   );
 
 const UserIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+  <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
     <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
   </svg>
 );
@@ -28,37 +30,108 @@ const CameraIcon = () => (
 );
 
 const EditarPerfil = () => {
-  const [avatar,      setAvatar]      = useState(null);
+  const [avatar]      = useState(null);
   const [showPwd,     setShowPwd]     = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const fileRef = useRef();
+  useEffect(() => {
+  const token = localStorage.getItem("token");
 
-  const handleAvatar = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setAvatar(ev.target.result);
-    reader.readAsDataURL(file);
-  };
+  fetch("http://127.0.0.1:8000/perfil", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  })
+    .then(res => res.json())
+    .then(data => {
+      console.log("Perfil cargado:", data);
+
+      setFormData({
+        firstName: data.nombre || "",
+        lastName: data.apellido || "",
+        email: data.email || "",
+        password: "",
+        confirmPassword: ""
+      });
+    })
+    .catch(err => console.error("Error cargando perfil:", err));
+}, []);
+
+
+
+  const [formData, setFormData] = useState({
+  firstName: "",
+  lastName: "",
+  email: "",
+  password: "",
+  confirmPassword: ""
+});
+
+const handleChange = (e) => {
+  const { name, value } = e.target;
+  setFormData({
+    ...formData,
+    [name]: value
+  });
+};
+
+const handleSubmit = (e) => {
+  e.preventDefault();
+
+  const token = localStorage.getItem("token");
+
+  fetch("http://127.0.0.1:8000/perfil", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      nombre: formData.firstName,
+      apellido: formData.lastName,
+      telefono: formData.email // ⚠️ cambia esto si tienes teléfono real
+    })
+  })
+    .then(res => res.json())
+    .then(data => {
+      console.log("Perfil actualizado:", data);
+      alert("Perfil actualizado correctamente 🚀");
+    })
+    .catch(err => console.error("Error actualizando:", err));
+};
+
+
 
   return (
     <div className="ep-page">
+      {/* Grid texture overlay */}
+      <div className="grid-texture" />
+
       <div className="ep-card">
 
         {/* ══ PANEL IZQUIERDO ══ */}
         <div className="ep-left">
-          <div className="img-izq" />
+          <div className="ep-left-orb1" />
+          <div className="ep-left-orb2" />
+
+          <div className="ep-brand">Confid<span>AI</span></div>
+
           <img
             src="https://png.pngtree.com/png-vector/20250128/ourmid/pngtree-artificial-intelligence-png-image_15351542.png"
             alt="ilustración"
             className="ep-left-img"
           />
+
+          <div className="ep-copyright">CONFIDENCIAL · © 2025</div>
         </div>
 
         {/* ══ PANEL DERECHO ══ */}
         <div className="ep-right">
 
-          <h1 className="ep-title">Editar perfil</h1>
+          <div className="ep-eyebrow">GESTIÓN DE CUENTA</div>
+          <h1 className="ep-title">Editar Perfil</h1>
           <p className="ep-subtitle">
             Actualiza tu información personal y credenciales de acceso.
           </p>
@@ -80,7 +153,9 @@ const EditarPerfil = () => {
               type="file"
               accept="image/*"
               className="ep-hidden"
-              onChange={handleAvatar}
+              value={formData.firstName}
+              onChange={handleChange}
+          
             />
 
             <div className="ep-avatar-meta">
@@ -97,7 +172,7 @@ const EditarPerfil = () => {
           </div>
 
           {/* Formulario */}
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="ep-grid">
 
               <div className="ep-group">
@@ -106,6 +181,8 @@ const EditarPerfil = () => {
                   className="ep-input"
                   type="text"
                   name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
                   placeholder="Pedro"
                   autoComplete="given-name"
                 />
@@ -118,17 +195,21 @@ const EditarPerfil = () => {
                   type="text"
                   name="lastName"
                   placeholder="Deltondo"
+                  value={formData.lastName}
+                  onChange={handleChange}
                   autoComplete="family-name"
                 />
               </div>
 
               <div className="ep-group ep-group--full">
-                <label className="ep-label">Correo electrónico</label>
+                <label className="ep-label">Correo Electrónico</label>
                 <input
                   className="ep-input"
                   type="email"
                   name="email"
-                  placeholder="pedro@bluerise.com"
+                  placeholder="pedro@confidai.com"
+                  value={formData.email}
+                  onChange={handleChange}
                   autoComplete="email"
                 />
               </div>
@@ -141,6 +222,8 @@ const EditarPerfil = () => {
                     type={showPwd ? "text" : "password"}
                     name="password"
                     placeholder="••••••••"
+                    value={formData.confirmPassword}
+                  onChange={handleChange}
                     autoComplete="new-password"
                   />
                   <button
@@ -155,13 +238,15 @@ const EditarPerfil = () => {
               </div>
 
               <div className="ep-group ep-group--full">
-                <label className="ep-label">Confirmar contraseña</label>
+                <label className="ep-label">Confirmar Contraseña</label>
                 <div className="ep-pwd-wrap">
                   <input
                     className="ep-input"
                     type={showConfirm ? "text" : "password"}
                     name="confirmPassword"
                     placeholder="••••••••"
+                    value={formData.firstName}
+                  onChange={handleChange}
                     autoComplete="new-password"
                   />
                   <button
@@ -178,11 +263,12 @@ const EditarPerfil = () => {
             </div>
 
             <button type="submit" className="ep-submit-btn">
-              Guardar cambios
+              Guardar Cambios
             </button>
+
             <p className="ep-already">
-          <a href="principal" className="ep-link">Cancelar</a>
-          </p>
+              <a href="principal" className="ep-link">Cancelar</a>
+            </p>
           </form>
 
         </div>

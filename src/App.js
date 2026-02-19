@@ -13,8 +13,8 @@ const App = () => (
             <Route exact path="/" element={<Formuini />} />
             <Route exact path="/registro" element={<Formuregi />} />
             <Route exact path="/principal" element={<PaginaPrincipal />} />
-            <Route exact path="/perfil" element={<Paginaresultados />} />
-            <Route exact path="/editarperfil" element={<PaginaPerfil />} />
+            <Route exact path="/resultados" element={<Paginaresultados />} />
+            <Route exact path="/perfil" element={<PaginaPerfil />} />
             <Route exact path="/avatar" element={<Avatar />} />
         </Routes>
     </BrowserRouter>
