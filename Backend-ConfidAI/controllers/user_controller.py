@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from models.user_model import User
 
+
 from services.auth_service import hash_password
 
 def registrar_usuario(db: Session, data):
@@ -34,7 +35,7 @@ def registrar_usuario(db: Session, data):
 
 
 def actualizar_usuario(db, user_id: int, datos):
-    usuario = db.query(Usuario).filter(Usuario.id == user_id).first()
+    usuario = db.query(User).filter(User.id == user_id).first()
 
     if not usuario:
         return {"error": "Usuario no encontrado"}
@@ -45,8 +46,8 @@ def actualizar_usuario(db, user_id: int, datos):
     if datos.apellido is not None:
         usuario.apellido = datos.apellido
 
-    if datos.telefono is not None:
-        usuario.telefono = datos.telefono
+    if datos.correo is not None:
+        usuario.correo = datos.correo
 
     db.commit()
     db.refresh(usuario)

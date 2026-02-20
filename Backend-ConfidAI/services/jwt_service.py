@@ -9,10 +9,14 @@ def verificar_token(
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
     token = credentials.credentials
+    print("TOKEN:", token)
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print("PAYLOAD:", payload)
         return payload
-    except JWTError:
+    except JWTError as e:
+        print("ERROR JWT:", e)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token inválido o expirado"
