@@ -26,7 +26,6 @@
   padding: 0;
 }
 
-/* ─── Keyframes ─────────────────────────────────────────── */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(28px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -49,7 +48,6 @@
   50%       { transform: translateY(-14px); }
 }
 
-/* ─── Page shell ────────────────────────────────────────── */
 .ep-page {
   min-height: 100vh;
   display: flex;
@@ -62,7 +60,6 @@
   overflow: hidden;
 }
 
-/* Background orbs */
 .ep-page::before {
   content: '';
   position: fixed;
@@ -84,7 +81,6 @@
   pointer-events: none;
 }
 
-/* Grid texture */
 .ep-page .grid-texture {
   position: fixed;
   inset: 0;
@@ -96,7 +92,6 @@
   z-index: 0;
 }
 
-/* ─── Card ──────────────────────────────────────────────── */
 .ep-card {
   display: flex;
   width: 1000px;
@@ -111,7 +106,6 @@
   z-index: 1;
 }
 
-/* ─── Left panel ────────────────────────────────────────── */
 .ep-left {
   position: relative;
   width: 40%;
@@ -125,7 +119,6 @@
   border-right: 1px solid var(--border);
 }
 
-/* Top accent line */
 .ep-left::before {
   content: '';
   position: absolute;
@@ -153,7 +146,7 @@
 }
 
 .ep-left-img {
-  width: 110%;
+  width: 175%;
   position: relative;
   z-index: 2;
   animation: float 6s ease-in-out infinite;
@@ -180,7 +173,6 @@
   z-index: 3;
 }
 
-/* ─── Right panel ───────────────────────────────────────── */
 .ep-right {
   flex: 1;
   background: var(--bg-card);
@@ -192,7 +184,6 @@
   overflow-y: auto;
 }
 
-/* ─── Header text ───────────────────────────────────────── */
 .ep-eyebrow {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 11px;
@@ -219,7 +210,6 @@
   line-height: 1.5;
 }
 
-/* ─── Avatar row ────────────────────────────────────────── */
 .ep-avatar-row {
   display: flex;
   align-items: center;
@@ -306,7 +296,6 @@
   border-color: var(--cyan);
 }
 
-/* ─── Form grid ─────────────────────────────────────────── */
 .ep-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -315,7 +304,6 @@
 .ep-group { display: flex; flex-direction: column; gap: 7px; }
 .ep-group--full { grid-column: 1 / -1; }
 
-/* ─── Labels ────────────────────────────────────────────── */
 .ep-label {
   font-size: 11px;
   font-weight: 600;
@@ -324,7 +312,6 @@
   text-transform: uppercase;
 }
 
-/* ─── Inputs ────────────────────────────────────────────── */
 .ep-input {
   height: 50px;
   border: 1.5px solid var(--border);
@@ -353,7 +340,6 @@
   box-shadow: 0 0 0 3px rgba(239, 83, 80, 0.12);
 }
 
-/* ─── Password toggle ───────────────────────────────────── */
 .ep-pwd-wrap { position: relative; }
 .ep-pwd-wrap .ep-input { padding-right: 46px; }
 .ep-pwd-toggle {
@@ -369,10 +355,8 @@
 }
 .ep-pwd-toggle:hover { color: var(--cyan); }
 
-/* ─── Error text ────────────────────────────────────────── */
 .ep-err { font-size: 11.5px; color: #ef5350; }
 
-/* ─── Strength bar ──────────────────────────────────────── */
 .ep-strength-bar { display: flex; gap: 4px; margin-top: 5px; }
 .ep-strength-bar__segment {
   flex: 1; height: 3px; border-radius: 3px;
@@ -385,7 +369,6 @@
 .ep-strength-bar__segment--4 { background: var(--str-strong); }
 .ep-strength-label { font-size: 11px; font-weight: 600; margin-top: 2px; }
 
-/* ─── Submit button ─────────────────────────────────────── */
 .ep-submit-btn {
   margin-top: 24px;
   height: 52px;
@@ -417,7 +400,6 @@
 }
 .ep-submit-btn:active { transform: translateY(0); }
 
-/* ─── Cancel link ───────────────────────────────────────── */
 .ep-already {
   font-size: 14px;
   color: var(--text-muted);
@@ -434,10 +416,8 @@
 }
 .ep-link:hover { color: var(--green); text-decoration: underline; }
 
-/* ─── Hidden file input ─────────────────────────────────── */
 .ep-hidden { display: none; }
 
-/* ─── Responsive ────────────────────────────────────────── */
 @media (max-width: 640px) {
   .ep-card { flex-direction: column; }
   .ep-left { width: 100%; min-height: 180px; justify-content: center; padding-bottom: 0; }

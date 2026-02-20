@@ -1,32 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
 import "../Style/Encabezado.css";
-import { FaUserCircle } from "react-icons/fa";
+import { FaUserCircle, FaBars, FaTimes } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const Header = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <header className="header">
       <div className="header-left">
-        <div className="logo-box">
-          <div className="logo-square"></div>
+        <div className="logo">
+          <img
+            className="logito"
+            src="https://assets-v2.lottiefiles.com/a/97fc9faa-117f-11ee-a3b3-5fb6ab9865dc/vR6mwrGRsr.gif"
+            alt="logo"
+          />
         </div>
         <h1 className="logo-text">
           Confid<span className="highlight">AI</span>
         </h1>
       </div>
 
-      <nav className="nav">
-        <a href="principal">Inicio</a>
+      <button
+        className="menu-toggle"
+        onClick={() => setMenuOpen(!menuOpen)}
+        aria-label="Abrir menú"
+      >
+        {menuOpen ? <FaTimes /> : <FaBars />}
+      </button>
+
+      <nav className={`nav ${menuOpen ? "open" : ""}`}>
+        <a href="principal" onClick={() => setMenuOpen(false)}>
+          Inicio
+        </a>
       </nav>
 
       <div className="header-right">
-        <Link to="/editarperfil" className="profile-link">
+        <Link to="/perfil" className="profile-link">
           <FaUserCircle className="user-icon" />
         </Link>
 
         <div className="user-info">
           <span>Hola, Carlos</span>
-          <small>(Estudiante ADSO)</small>
+          <h5>Mi perfil</h5>
         </div>
       </div>
     </header>

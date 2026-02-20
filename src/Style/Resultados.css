@@ -189,7 +189,6 @@
   background: linear-gradient(90deg, transparent, #00ff88, transparent);
 }
 
-/* ─── Card typography ───────────────────────────────────── */
 .section-label {
   font-family: 'Bebas Neue', sans-serif;
   letter-spacing: 2px;
@@ -204,7 +203,6 @@
   margin-bottom: 18px;
 }
 
-/* ─── Score ring ────────────────────────────────────────── */
 .score-ring {
   position: relative;
   width: 140px;
@@ -245,7 +243,6 @@
   margin-top: 2px;
 }
 
-/* ─── Info box ──────────────────────────────────────────── */
 .info-box {
   background: rgba(0, 212, 255, 0.08);
   border: 1px solid rgba(0, 212, 255, 0.15);
@@ -259,7 +256,6 @@
   line-height: 1.7;
 }
 
-/* ─── Tags ──────────────────────────────────────────────── */
 .tag-row {
   display: flex;
   gap: 8px;
@@ -278,7 +274,6 @@
 .tag--green { background: rgba(0, 255, 136, 0.1); color: #00ff88; border: 1px solid rgba(0, 255, 136, 0.3); }
 .tag--cyan  { background: rgba(0, 212, 255, 0.1); color: #00d4ff; border: 1px solid rgba(0, 212, 255, 0.3); }
 
-/* ─── Radar scores ──────────────────────────────────────── */
 .radar-scores {
   display: flex;
   justify-content: center;
@@ -298,7 +293,6 @@
   letter-spacing: 1px;
 }
 
-/* ─── Non-verbal items ──────────────────────────────────── */
 .nonverbal-item {
   display: flex;
   align-items: center;
@@ -326,7 +320,6 @@
 .nonverbal-sublabel { font-size: 12px; color: rgba(255, 255, 255, 0.5); margin-bottom: 2px; }
 .nonverbal-value   { font-size: 14px; color: #f0f6ff; font-weight: 500; }
 
-/* ─── Feedback items ────────────────────────────────────── */
 .feedback-item {
   padding: 16px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
@@ -370,7 +363,6 @@
   line-height: 1.6;
 }
 
-/* ─── Action items ──────────────────────────────────────── */
 .action-item {
   display: flex;
   align-items: center;
@@ -406,7 +398,6 @@
   line-height: 1.5;
 }
 
-/* ─── Footer ────────────────────────────────────────────── */
 .perfil-footer {
   margin-top: 32px;
   text-align: center;
@@ -415,7 +406,6 @@
   letter-spacing: 2px;
 }
 
-/* ─── Responsive ────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .results-grid { grid-template-columns: 1fr 1fr; }
 }

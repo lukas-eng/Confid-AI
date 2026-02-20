@@ -26,7 +26,6 @@ const Formuini = () => {
   return (
     <div className="contenedorformu">
 
-      {/* Grid texture overlay */}
       <div className="grid-texture" />
 
       <ElectricBorder
@@ -79,7 +78,7 @@ const Formuini = () => {
 
       <img
         className="imgformu"
-        src="https://img.freepik.com/foto-gratis/concepto-ser-humano-generado-ia_23-2150688377.jpg"
+        src="https://static.wixstatic.com/media/55d1d0_774dd340d53b43fab4182fd4f484fcb0~mv2.gif"
         alt="Registro de Usuario"
       />
     </div>

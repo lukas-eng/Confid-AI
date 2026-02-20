@@ -89,7 +89,6 @@ export default function PaginaPerfil() {
 
       <div className={`perfil-inner${mounted ? " perfil-inner--visible" : ""}`}>
 
-        {/* Header */}
         <div className="perfil-header">
           <div>
             <h1 className="perfil-title">
@@ -102,10 +101,8 @@ export default function PaginaPerfil() {
           </div>
         </div>
 
-        {/* Top 3-column grid */}
         <div className="results-grid">
 
-          {/* Inteligencia Emocional */}
           <GlowCard delay={100}>
             <div className="section-label">PUNTUACIÓN GLOBAL</div>
             <div className="card-title">Inteligencia Emocional</div>
@@ -136,7 +133,6 @@ export default function PaginaPerfil() {
             </div>
           </GlowCard>
 
-          {/* Radar */}
           <GlowCard delay={200}>
             <div className="section-label">EVALUACIÓN MULTIDIMENSIONAL</div>
             <div className="card-title">Habilidades Blandas</div>
@@ -173,7 +169,6 @@ export default function PaginaPerfil() {
             </div>
           </GlowCard>
 
-          {/* Lenguaje no verbal */}
           <GlowCard delay={300} accentGreen>
             <div className="section-label">ANÁLISIS CONDUCTUAL</div>
             <div className="card-title">Lenguaje No Verbal</div>
@@ -200,10 +195,8 @@ export default function PaginaPerfil() {
           </GlowCard>
         </div>
 
-        {/* Bottom 2-column grid */}
         <div className="bottom-grid">
 
-          {/* Feedback */}
           <GlowCard delay={400}>
             <div className="section-label">EVALUACIÓN CUALITATIVA</div>
             <div className="card-title">Feedback Detallado</div>
@@ -240,7 +233,6 @@ export default function PaginaPerfil() {
             ))}
           </GlowCard>
 
-          {/* Plan de Acción */}
           <GlowCard delay={500} accentGreen>
             <div className="section-label">HOJA DE RUTA</div>
             <div className="card-title">Plan de Acción</div>

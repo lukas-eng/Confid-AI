@@ -30,113 +30,108 @@ const CameraIcon = () => (
 );
 
 const EditarPerfil = () => {
-  const [avatar]      = useState(null);
-  const [showPwd,     setShowPwd]     = useState(false);
+  const [avatar, setAvatar] = useState(null);
+  const [showPwd, setShowPwd] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const fileRef = useRef();
-  useEffect(() => {
-  const token = localStorage.getItem("token");
-
-  fetch("http://127.0.0.1:8000/perfil", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`
-    }
-  })
-    .then(res => res.json())
-    .then(data => {
-      console.log("Perfil cargado:", data);
-
-      setFormData({
-        firstName: data.nombre || "",
-        lastName: data.apellido || "",
-        email: data.email || "",
-        password: "",
-        confirmPassword: ""
-      });
-    })
-    .catch(err => console.error("Error cargando perfil:", err));
-}, []);
-
-
 
   const [formData, setFormData] = useState({
-  firstName: "",
-  lastName: "",
-  email: "",
-  password: "",
-  confirmPassword: ""
-});
-
-const handleChange = (e) => {
-  const { name, value } = e.target;
-  setFormData({
-    ...formData,
-    [name]: value
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: ""
   });
-};
 
-const handleSubmit = (e) => {
-  e.preventDefault();
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    
 
-  const token = localStorage.getItem("token");
-
-  fetch("http://127.0.0.1:8000/perfil", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`
-    },
-    body: JSON.stringify({
-      nombre: formData.firstName,
-      apellido: formData.lastName,
-      telefono: formData.email // ⚠️ cambia esto si tienes teléfono real
+    fetch("http://127.0.0.1:8000/usuarios/perfil", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+      
     })
-  })
-    .then(res => res.json())
-    .then(data => {
-      console.log("Perfil actualizado:", data);
-      alert("Perfil actualizado correctamente 🚀");
+    
+      .then(res => res.json())
+      .then(data => {
+        setFormData({
+          firstName: data.nombre || "",
+          lastName: data.apellido || "",
+          correo: data.correo || "",
+          password: "",
+          confirmPassword: ""
+        });
+      })
+      .catch(err => console.error("Error cargando perfil:", err));
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setAvatar(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const token = localStorage.getItem("token");
+
+    fetch("http://127.0.0.1:8000/usuarios/perfil", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        nombre: formData.firstName,
+        apellido: formData.lastName,
+        correo: formData.correo,
+        password: formData.password
+      })
     })
-    .catch(err => console.error("Error actualizando:", err));
-};
-
-
+      .then(res => res.json())
+      .then(data => {
+        console.log("Perfil actualizado:", data);
+        alert("Perfil actualizado correctamente");
+      })
+      .catch(err => console.error("Error actualizando:", err));
+  };
 
   return (
     <div className="ep-page">
-      {/* Grid texture overlay */}
       <div className="grid-texture" />
-
       <div className="ep-card">
 
-        {/* ══ PANEL IZQUIERDO ══ */}
         <div className="ep-left">
           <div className="ep-left-orb1" />
           <div className="ep-left-orb2" />
-
           <div className="ep-brand">Confid<span>AI</span></div>
-
           <img
-            src="https://png.pngtree.com/png-vector/20250128/ourmid/pngtree-artificial-intelligence-png-image_15351542.png"
+            src="https://static.wixstatic.com/media/55d1d0_774dd340d53b43fab4182fd4f484fcb0~mv2.gif"
             alt="ilustración"
             className="ep-left-img"
           />
-
-          <div className="ep-copyright">CONFIDENCIAL · © 2025</div>
         </div>
 
-        {/* ══ PANEL DERECHO ══ */}
         <div className="ep-right">
-
           <div className="ep-eyebrow">GESTIÓN DE CUENTA</div>
           <h1 className="ep-title">Editar Perfil</h1>
           <p className="ep-subtitle">
             Actualiza tu información personal y credenciales de acceso.
           </p>
 
-          {/* Avatar */}
           <div className="ep-avatar-row">
             <div className="ep-avatar-wrap" onClick={() => fileRef.current.click()}>
               <div className="ep-avatar-circle">
@@ -153,14 +148,11 @@ const handleSubmit = (e) => {
               type="file"
               accept="image/*"
               className="ep-hidden"
-              value={formData.firstName}
-              onChange={handleChange}
-          
+              onChange={handleFileChange}
             />
 
             <div className="ep-avatar-meta">
               <strong>Foto de perfil</strong>
-              JPG, PNG o GIF — máx. 5 MB
               <button
                 type="button"
                 className="ep-upload-btn"
@@ -171,7 +163,6 @@ const handleSubmit = (e) => {
             </div>
           </div>
 
-          {/* Formulario */}
           <form onSubmit={handleSubmit}>
             <div className="ep-grid">
 
@@ -183,7 +174,6 @@ const handleSubmit = (e) => {
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleChange}
-                  placeholder="Pedro"
                   autoComplete="given-name"
                 />
               </div>
@@ -194,7 +184,6 @@ const handleSubmit = (e) => {
                   className="ep-input"
                   type="text"
                   name="lastName"
-                  placeholder="Deltondo"
                   value={formData.lastName}
                   onChange={handleChange}
                   autoComplete="family-name"
@@ -207,7 +196,6 @@ const handleSubmit = (e) => {
                   className="ep-input"
                   type="email"
                   name="email"
-                  placeholder="pedro@confidai.com"
                   value={formData.email}
                   onChange={handleChange}
                   autoComplete="email"
@@ -221,16 +209,14 @@ const handleSubmit = (e) => {
                     className="ep-input"
                     type={showPwd ? "text" : "password"}
                     name="password"
-                    placeholder="••••••••"
-                    value={formData.confirmPassword}
-                  onChange={handleChange}
+                    value={formData.password}
+                    onChange={handleChange}
                     autoComplete="new-password"
                   />
                   <button
                     type="button"
                     className="ep-pwd-toggle"
                     onClick={() => setShowPwd((v) => !v)}
-                    aria-label="Mostrar contraseña"
                   >
                     <EyeIcon open={showPwd} />
                   </button>
@@ -244,16 +230,14 @@ const handleSubmit = (e) => {
                     className="ep-input"
                     type={showConfirm ? "text" : "password"}
                     name="confirmPassword"
-                    placeholder="••••••••"
-                    value={formData.firstName}
-                  onChange={handleChange}
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
                     autoComplete="new-password"
                   />
                   <button
                     type="button"
                     className="ep-pwd-toggle"
                     onClick={() => setShowConfirm((v) => !v)}
-                    aria-label="Mostrar contraseña"
                   >
                     <EyeIcon open={showConfirm} />
                   </button>
@@ -269,8 +253,8 @@ const handleSubmit = (e) => {
             <p className="ep-already">
               <a href="principal" className="ep-link">Cancelar</a>
             </p>
-          </form>
 
+          </form>
         </div>
       </div>
     </div>

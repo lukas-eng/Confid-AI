@@ -9,29 +9,32 @@ export default function PaginaPrincipal() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (imageRef.current && containerRef.current) {
-        const { clientX, clientY } = e;
-        const { innerWidth, innerHeight } = window;
+  const handleMouseMove = (e) => {
+    if (window.innerWidth <= 768) return;
 
-        const xPos = (clientX / innerWidth - 0.5) * 20;
-        const yPos = (clientY / innerHeight - 0.5) * 20;
+    if (imageRef.current && containerRef.current) {
+      const { clientX, clientY } = e;
+      const { innerWidth, innerHeight } = window;
 
-        imageRef.current.style.transform = `translate(${xPos}px, ${yPos}px)`;
-      }
-    };
+      const xPos = (clientX / innerWidth - 0.5) * 20;
+      const yPos = (clientY / innerHeight - 0.5) * 20;
 
-    const container = containerRef.current;
-    if (container) container.addEventListener("mousemove", handleMouseMove);
-    return () => { if (container) container.removeEventListener("mousemove", handleMouseMove); };
-  }, []);
+      imageRef.current.style.transform = `translate(${xPos}px, ${yPos}px)`;
+    }
+  };
+
+  const container = containerRef.current;
+  if (container) container.addEventListener("mousemove", handleMouseMove);
+  return () => {
+    if (container) container.removeEventListener("mousemove", handleMouseMove);
+  };
+}, []);
 
   return (
     <div className="contenedor">
       <Encabezado />
       <div className="principal" ref={containerRef}>
 
-        {/* Grid texture overlay */}
         <div className="grid-texture" />
 
         <div className="principal-contenedor">
@@ -43,20 +46,20 @@ export default function PaginaPrincipal() {
 
           <p>
             Entrena tu mente para entrevistas reales. Nuestro evaluador de IA te ayuda
-            a gestionar la ansiedad, mejorar tu comunicación no verbal y proyectar seguridad.
+            a gestionar la ansiedad, mejorar tu comunicación para proyectar seguridad.
           </p>
 
           <button
       className="btn-principal"
       onClick={() => navigate("/avatar")}
     >
-      ▶ INICIAR ENTREVISTA DE CONFIANZA
+      ▶ INICIAR ENTREVISTA
     </button>
         </div>
 
         <div className="principal-imagen" ref={imageRef}>
           <img
-            src="https://png.pngtree.com/png-clipart/20240829/original/pngtree-isolated-on-white-ai-robot-analyzing-through-3d-transparent-background-png-image_15878991.png"
+            src="https://static.wixstatic.com/media/55d1d0_774dd340d53b43fab4182fd4f484fcb0~mv2.gif"
             alt="IA"
           />
         </div>

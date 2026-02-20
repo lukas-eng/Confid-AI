@@ -2,10 +2,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 30px 40px;
-  background-color: #f5f6f7;
+  padding: 40px 40px;
+  background-color: white;
   border-bottom: 1px solid #ddd;
   font-family: Arial, sans-serif;
+  position: relative;
 }
 
 .header-left {
@@ -14,13 +15,18 @@
   gap: 10px;
 }
 
-.logo-box {
-  width: 35px;
+.logo {
+  width: 30px;
   height: 35px;
   border: 2px solid #2b7de9;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.logito {
+  width: 120px;
+  height: 110px;
 }
 
 .logo-square {
@@ -30,9 +36,15 @@
 }
 
 .logo-text {
-  font-size: 20px;
+  font-size: 30px;
+  margin-left: 10px;
   font-weight: bold;
   color: #333;
+}
+h5{
+  justify-content: center;
+  align-items: center;
+  margin-left: 7%;
 }
 
 .highlight {
@@ -42,12 +54,13 @@
 .nav {
   display: flex;
   gap: 30px;
+  font-size: 25px;
 }
 
 .nav a {
   text-decoration: none;
   color: #333;
-  font-weight: 500;
+  font-size: 25px;
 }
 
 .nav a:hover {
@@ -61,17 +74,120 @@
 }
 
 .user-icon {
-  font-size: 28px;
+  font-size: 40px;
   color: #555;
 }
 
 .user-info {
   display: flex;
   flex-direction: column;
-  font-size: 14px;
+  font-size: 20px;
+  color: #141414;
 }
 
 .user-info small {
   font-size: 12px;
-  color: #777;
+  color: #141414;
+}
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #333;
+  z-index: 100;
+}
+
+@media (max-width: 1024px) {
+  .header {
+    padding: 16px 24px;
+  }
+
+  .logito {
+    width: 80px;
+    height: 70px;
+  }
+
+  .logo-text {
+    font-size: 22px;
+  }
+
+  .nav a {
+    font-size: 18px;
+  }
+
+  .nav {
+    gap: 20px;
+    font-size: 18px;
+  }
+
+  .user-icon {
+    font-size: 30px;
+  }
+
+  .user-info {
+    font-size: 15px;
+  }
+}
+@media (max-width: 768px) {
+  .header {
+    flex-wrap: wrap;
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+
+  /* Nav se convierte en menú desplegable */
+  .nav {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    background: white;
+    border-top: 1px solid #ddd;
+    padding: 12px 0;
+    gap: 12px;
+  }
+
+  .nav.open {
+    display: flex;
+  }
+
+  .nav a {
+    font-size: 16px;
+    padding: 6px 0;
+  }
+
+  .logito {
+    width: 55px;
+    height: 50px;
+  }
+
+  .logo-text {
+    font-size: 18px;
+  }
+
+  .user-info {
+    font-size: 13px;
+  }
+
+  .user-icon {
+    font-size: 26px;
+  }
+}
+@media (max-width: 480px) {
+  .logo-text {
+    font-size: 20px;
+  }
+  .logito {
+    width: 80px;
+    height: 70px;
+  }
+  .user-info {
+    display: none;
+  }
 }
