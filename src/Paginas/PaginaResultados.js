@@ -97,7 +97,7 @@ export default function PaginaPerfil() {
           </div>
           <div className="perfil-header-right">
             <button className="btn-download">↓ &nbsp; Descargar Reporte PDF</button>
-            <div className="perfil-date">Generado el 19 · 02 · 2025</div>
+
           </div>
         </div>
 
@@ -108,7 +108,7 @@ export default function PaginaPerfil() {
             <div className="card-title">Inteligencia Emocional</div>
             <div className="score-ring">
               <svg width="140" height="140" viewBox="0 0 140 140">
-                <defs>
+                <defs>  
                   <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stopColor="#0057ff" />
                     <stop offset="100%" stopColor="#00d4ff" />
@@ -121,7 +121,7 @@ export default function PaginaPerfil() {
                 <div className="score-number">
                   <AnimatedNumber target={85} suffix="%" />
                 </div>
-                <div className="score-label">SCORE</div>
+                <div className="score-label">Puntuación</div>
               </div>
             </div>
             <div className="info-box">

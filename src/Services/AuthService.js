@@ -10,6 +10,6 @@ export const login = async (data) => {
 };
 
 export const registro = async (data) => {
-  const res = await api.post("/registro", data);
+  const res = await api.post("/usuarios/registro", data);
   return res.data;
 };

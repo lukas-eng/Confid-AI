@@ -36,7 +36,6 @@
 .pagina-perfil {
   min-height: 100vh;
   background: #020b18;
-  font-family: 'DM Sans', sans-serif;
   color: #e2e8f0;
   position: relative;
   overflow: hidden;
@@ -92,7 +91,6 @@
   margin-bottom: 40px;
 }
 .perfil-eyebrow {
-  font-family: 'Bebas Neue', sans-serif;
   font-size: 11px;
   letter-spacing: 4px;
   color: #00d4ff;
@@ -100,7 +98,6 @@
   opacity: 0.7;
 }
 .perfil-title {
-  font-family: 'Bebas Neue', sans-serif;
   font-size: 48px;
   letter-spacing: 2px;
   line-height: 1;
@@ -125,7 +122,6 @@
   border: none;
   padding: 12px 28px;
   border-radius: 50px;
-  font-family: 'DM Sans', sans-serif;
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -190,7 +186,6 @@
 }
 
 .section-label {
-  font-family: 'Bebas Neue', sans-serif;
   letter-spacing: 2px;
   font-size: 11px;
   color: #00d4ff;
@@ -229,7 +224,6 @@
   justify-content: center;
 }
 .score-number {
-  font-family: 'Bebas Neue', sans-serif;
   font-size: 44px;
   line-height: 1;
   background: linear-gradient(135deg, #00d4ff, #ffffff);
@@ -283,7 +277,6 @@
 }
 .radar-score-item { text-align: center; }
 .radar-score-number {
-  font-family: 'Bebas Neue', sans-serif;
   font-size: 22px;
   color: #00d4ff;
 }
@@ -340,7 +333,6 @@
 }
 .feedback-label { font-size: 14px; font-weight: 600; color: #f0f6ff; }
 .feedback-score {
-  font-family: 'Bebas Neue', sans-serif;
   font-size: 22px;
 }
 .feedback-score-pct { font-size: 14px; }

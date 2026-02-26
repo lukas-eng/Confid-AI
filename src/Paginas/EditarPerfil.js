@@ -43,31 +43,27 @@ const EditarPerfil = () => {
     confirmPassword: ""
   });
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    
+useEffect(() => {
+  const token = localStorage.getItem("token");
 
-    fetch("http://127.0.0.1:8000/usuarios/perfil", {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${token}`
-      }
-      
+  fetch("http://127.0.0.1:8000/usuarios/perfil", {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
+  })
+    .then(res => res.json())
+    .then(data => {
+      setFormData({
+        firstName: data.nombre || "",
+        lastName: data.apellido || "",
+        email: data.correo || "",  
+        password: "",
+        confirmPassword: ""
+      });
     })
-    
-      .then(res => res.json())
-      .then(data => {
-        setFormData({
-          firstName: data.nombre || "",
-          lastName: data.apellido || "",
-          correo: data.correo || "",
-          password: "",
-          confirmPassword: ""
-        });
-      })
-      .catch(err => console.error("Error cargando perfil:", err));
-  }, []);
-
+    .catch(err => console.error("Error cargando perfil:", err));
+}, []);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -83,31 +79,37 @@ const EditarPerfil = () => {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+const handleSubmit = (e) => {
+  e.preventDefault();
 
-    const token = localStorage.getItem("token");
+ 
+  if (formData.password !== formData.confirmPassword) {
+    alert("Las contraseñas no coinciden");
+    return; 
+  }
 
-    fetch("http://127.0.0.1:8000/usuarios/perfil", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        nombre: formData.firstName,
-        apellido: formData.lastName,
-        correo: formData.correo,
-        password: formData.password
-      })
+  const token = localStorage.getItem("token");
+
+  fetch("http://127.0.0.1:8000/usuarios/perfil", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      nombre: formData.firstName,
+      apellido: formData.lastName,
+      correo: formData.email,
+      password: formData.password
     })
-      .then(res => res.json())
-      .then(data => {
-        console.log("Perfil actualizado:", data);
-        alert("Perfil actualizado correctamente");
-      })
-      .catch(err => console.error("Error actualizando:", err));
-  };
+  })
+    .then(res => res.json())
+    .then(data => {
+      console.log("Perfil actualizado:", data);
+      alert("Perfil actualizado correctamente");
+    })
+    .catch(err => console.error("Error actualizando:", err));
+};
 
   return (
     <div className="ep-page">

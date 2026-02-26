@@ -1,3 +1,9 @@
+*{
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 @keyframes gradient-shift {
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }
@@ -45,8 +51,7 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  overflow: visible;
-  font-family: 'DM Sans', sans-serif;
+  overflow-y: hidden;
 }
 
 .principal::before {
@@ -192,7 +197,7 @@
 
 .principal-cartas {
   position: absolute;
-  bottom: 50px;
+  bottom: 120px;
   left: 80px;
   right: 80px;
   display: flex;
@@ -204,7 +209,7 @@
   background: rgba(10, 20, 40, 0.75);
   backdrop-filter: blur(20px);
   color: #e2e8f0;
-  padding: 20px 24px;
+  padding: 40px 34px;
   border-radius: 16px;
   flex: 1;
   border: 1px solid rgba(0, 212, 255, 0.2);
@@ -273,7 +278,6 @@
   border-radius: 3px;
 }
 
-/* ─── RESPONSIVE ─────────────────────────────────────────── */
 
 @media (max-width: 1400px) {
   .principal h1 {

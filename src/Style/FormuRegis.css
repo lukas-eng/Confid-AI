@@ -8,7 +8,6 @@ html, body {
   width: 100%;
   height: 100%;
   overflow-x: hidden;
-  font-family: 'DM Sans', sans-serif;   
 }
 
 @keyframes orb-move {
@@ -167,7 +166,6 @@ html, body {
 
 .tituloregis {
   text-align: center;
-  font-family: 'Bebas Neue', sans-serif;
   font-size: 38px;
   letter-spacing: 3px;
   margin-bottom: 8px;
@@ -208,7 +206,6 @@ input {
   border: 1.5px solid rgba(0, 212, 255, 0.2);
   border-radius: 12px;
   font-size: 15px;
-  font-family: 'DM Sans', sans-serif;
   transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.04);
   color: #f0f6ff;
@@ -236,7 +233,6 @@ input:focus {
   max-width: 430px;
   font-size: 15px;
   font-weight: 700;
-  font-family: 'DM Sans', sans-serif;
   letter-spacing: 0.5px;
   color: white;
   border: none;

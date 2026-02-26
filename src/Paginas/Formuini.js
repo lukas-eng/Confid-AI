@@ -69,7 +69,7 @@ const Formuini = () => {
               &nbsp; Iniciar Sesión
               </button>
               <button className="inicio" type="button" onClick={irRegistro}>
-                Crear una cuenta
+                Registrarse
               </button>
             </div>
           </form>

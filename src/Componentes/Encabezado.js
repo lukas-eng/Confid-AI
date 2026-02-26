@@ -1,10 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../Style/Encabezado.css";
 import { FaUserCircle, FaBars, FaTimes } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    fetch("http://127.0.0.1:8000/usuarios/perfil", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+      .then(res => res.json())
+      .then(data => {
+        setUserName(data.nombre);
+      })
+      .catch(err => console.error("Error obteniendo usuario:", err));
+  }, []);
 
   return (
     <header className="header">
@@ -21,7 +38,6 @@ const Header = () => {
         </h1>
       </div>
 
-      {/* Botón hamburguesa */}
       <button
         className="menu-toggle"
         onClick={() => setMenuOpen(!menuOpen)}
@@ -30,7 +46,6 @@ const Header = () => {
         {menuOpen ? <FaTimes /> : <FaBars />}
       </button>
 
-      {/* Nav: clase "open" cuando el menú está activo */}
       <nav className={`nav ${menuOpen ? "open" : ""}`}>
         <Link to="/resultados" onClick={() => setMenuOpen(false)}>
           Mis Resultados
@@ -42,7 +57,7 @@ const Header = () => {
           <FaUserCircle className="user-icon" />
         </Link>
         <div className="user-info">
-          <span>Hola, Carlos</span>
+          <span>Hola, {userName || "Usuario"}</span>
           <h5>Mi perfil</h5>
         </div>
       </div>
