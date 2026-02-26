@@ -27,9 +27,9 @@ def perfil_usuario(
     token_data: dict = Depends(verificar_token),
     db: Session = Depends(get_db)
 ):
-    id = token_data.get("id")
+    user_id = token_data.get("user_id")
 
-    usuario = db.query(User).filter(id == id).first()
+    usuario = db.query(User).filter(User.id == user_id).first()
 
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
@@ -39,7 +39,6 @@ def perfil_usuario(
         "apellido": usuario.apellido,
         "correo": usuario.correo
     }
-
 @router.put("/perfil")
 def editar_perfil(
     datos: UserUpdate,

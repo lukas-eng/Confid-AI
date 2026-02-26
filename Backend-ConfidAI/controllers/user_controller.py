@@ -49,6 +49,9 @@ def actualizar_usuario(db, user_id: int, datos):
     if datos.correo is not None:
         usuario.correo = datos.correo
 
+    if datos.password:
+        usuario.password = hash_password(datos.password)
+
     db.commit()
     db.refresh(usuario)
 
