@@ -2,10 +2,46 @@ import React, { useState, useEffect } from "react";
 import "../Style/Encabezado.css";
 import { FaUserCircle, FaBars, FaTimes } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userName, setUserName] = useState("");
+
+  const cerrarSesion = () => {
+    Swal.fire({
+      title: "¿Cerrar sesión?",
+      text: "¿Seguro que quieres salir?",
+      imageUrl: "https://cdn-icons-png.flaticon.com/512/1828/1828479.png",
+      imageWidth: 100,
+      imageHeight: 100,
+      showCancelButton: true,
+      confirmButtonText: "Sí, salir",
+      cancelButtonText: "Cancelar"
+    }).then((result) => {
+      if (result.isConfirmed) {
+
+        localStorage.removeItem("token");
+
+        Swal.fire({
+          title: "Sesión cerrada",
+          text: "Tu sesión se cerró correctamente",
+          icon: "success"
+        }).then(() => {
+          window.location.replace("/");
+        });
+
+      }
+    });
+  };
+  
+  useEffect(() => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    window.location.href = "/";
+  }
+}, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -56,10 +92,21 @@ const Header = () => {
         <Link to="/perfil" className="profile-link">
           <FaUserCircle className="user-icon" />
         </Link>
+
         <div className="user-info">
-          <span>Hola, {userName || "Usuario"}</span>
+          <span>
+            Hola, {(userName || "Usuario").charAt(0).toUpperCase() + (userName || "Usuario").slice(1)}
+          </span>
           <h5>Mi perfil</h5>
         </div>
+
+        <button className="logout-btn" onClick={cerrarSesion}>
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/3168/3168147.png"
+            alt="cerrar sesion"
+            className="logout-icon"
+          />
+        </button>
       </div>
     </header>
   );

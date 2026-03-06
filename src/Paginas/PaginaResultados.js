@@ -43,6 +43,13 @@ const actionItems = [
 function AnimatedNumber({ target, suffix = "" }) {
   const [count, setCount] = useState(0);
   useEffect(() => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    window.location.href = "/";
+  }
+}, []);
+  useEffect(() => {
     let start = 0;
     const duration = 1800;
     const step = (timestamp) => {

@@ -9,6 +9,14 @@ export default function PaginaPrincipal() {
   const navigate = useNavigate();
 
   useEffect(() => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    window.location.href = "/";
+  }
+}, []);
+
+  useEffect(() => {
   const handleMouseMove = (e) => {
     if (window.innerWidth <= 768) return;
 

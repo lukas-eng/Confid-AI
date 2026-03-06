@@ -1,10 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../Style/Encabezado.css";
 import { FaUserCircle, FaBars, FaTimes } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userName, setUserName] = useState("");
+  
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    fetch("http://127.0.0.1:8000/usuarios/perfil", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+      .then(res => res.json())
+      .then(data => {
+        setUserName(data.nombre);
+      })
+      .catch(err => console.error("Error obteniendo usuario:", err));
+  }, []);
 
   return (
     <header className="header">
@@ -30,10 +48,10 @@ const Header = () => {
       </button>
 
       <nav className={`nav ${menuOpen ? "open" : ""}`}>
-        <a href="principal" onClick={() => setMenuOpen(false)}>
-          Inicio
-        </a>
-      </nav>
+  <Link to="/principal" onClick={() => setMenuOpen(false)}>
+    Inicio
+  </Link>
+</nav>
 
       <div className="header-right">
         <Link to="/perfil" className="profile-link">
@@ -41,7 +59,9 @@ const Header = () => {
         </Link>
 
         <div className="user-info">
-          <span>Hola, Carlos</span>
+          <span>
+            Hola, {(userName || "Usuario").charAt(0).toUpperCase() + (userName || "Usuario").slice(1)}
+          </span>
           <h5>Mi perfil</h5>
         </div>
       </div>

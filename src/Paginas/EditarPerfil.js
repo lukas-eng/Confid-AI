@@ -42,7 +42,13 @@ const EditarPerfil = () => {
     password: "",
     confirmPassword: ""
   });
+useEffect(() => {
+  const token = localStorage.getItem("token");
 
+  if (!token) {
+    window.location.href = "/";
+  }
+}, []);
 useEffect(() => {
   const token = localStorage.getItem("token");
 

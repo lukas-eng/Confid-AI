@@ -8,7 +8,21 @@
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   position: relative;
 }
+.logout-btn{
+  background: none;
+  border: none;
+  cursor: pointer;
+}
 
+.logout-icon{
+  width: 45px;
+  height: 45px;
+  transition: transform 0.2s;
+}
+
+.logout-icon:hover{
+  transform: scale(1.1);
+}
 .header-left {
   display: flex;
   align-items: center;
@@ -137,9 +151,42 @@ h5{
     padding: 14px 16px;
     gap: 10px;
   }
+  .nav.open {
+    display: flex;
+  }
 
+  .nav a {
+    font-size: 16px;
+    padding: 6px 0;
+  }
+
+  .logito {
+    width: 75px;
+    height: 70px;
+  }
+
+  .logo-text {
+    font-size: 25px;
+  }
+
+  .user-info {
+    font-size: 15px;
+  }
+
+  .user-icon {
+    font-size: 26px;
+  }
+  .logout-icon{
+  width: 35px;
+  height: 35px;
+  }
+}
+@media (max-width: 480px) {
   .menu-toggle {
-    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    text-align: right;
   }
   .nav {
     display: none;
@@ -151,33 +198,6 @@ h5{
     gap: 12px;
   }
 
-  .nav.open {
-    display: flex;
-  }
-
-  .nav a {
-    font-size: 16px;
-    padding: 6px 0;
-  }
-
-  .logito {
-    width: 55px;
-    height: 50px;
-  }
-
-  .logo-text {
-    font-size: 18px;
-  }
-
-  .user-info {
-    font-size: 13px;
-  }
-
-  .user-icon {
-    font-size: 26px;
-  }
-}
-@media (max-width: 480px) {
   .header{
     padding: 20px 20px;
   }
@@ -190,5 +210,9 @@ h5{
   }
   .user-info {
     display: none;
+  }
+  .logout-icon{
+  width: 25px;
+  height: 25px;
   }
 }
