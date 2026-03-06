@@ -7,8 +7,26 @@ from fastapi.middleware.cors import CORSMiddleware
 Base.metadata.create_all(bind=engine)
 from fastapi.staticfiles import StaticFiles
 import os
+import google.generativeai as genai
+from dotenv import load_dotenv
+from contextlib import asynccontextmanager
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("\n--- 🔍 MODELOS GEMINI DISPONIBLES (GRATUITOS/PAGO) ---")
+    try:
+        load_dotenv()
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        # Iterar sobre todos los modelos disponibles en la API principal
+        for m in genai.list_models():
+            if 'generateContent' in m.supported_generation_methods:
+                print(f"✅ {m.name}")
+    except Exception as e:
+        print("❌ Error obteniendo modelos:", e)
+    print("------------------------------------------------------\n")
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 
 app.include_router(user_router)
@@ -23,8 +41,8 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3001",
-        "http://127.0.0.1:3001"
+        "http://localhost:3000",
+        "http://127.0.0.1:3000"
     ],
     allow_credentials=True,
     allow_methods=["*"],
