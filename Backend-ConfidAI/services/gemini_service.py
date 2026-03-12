@@ -22,7 +22,6 @@ genai.configure(api_key=mi_api_key)
 model = genai.GenerativeModel('gemini-2.0-flash')
 
 
-
 # ============================================
 # ANALISIS BASICO DEL AUDIO
 # ============================================
@@ -74,15 +73,10 @@ def respuesta_corta(texto):
 
 
 # ============================================
-# DETECTAR MULETILLAS (mejorado para español)
+# DETECTAR MULETILLAS
 # ============================================
 
 def detectar_muletillas(texto):
-    """
-    Detecta muletillas en español.
-    Se usa lookahead/lookbehind con espacios y puntuación
-    en lugar de \\b que falla con vocales acentuadas.
-    """
     muletillas = [
         r"(?<!\w)eh(?!\w)",
         r"(?<!\w)ehh(?!\w)",
@@ -95,25 +89,19 @@ def detectar_muletillas(texto):
         r"digamos",
         r"como que",
         r"(?<!\w)bueno(?!\w)",
-        r"(?<!\w)o(?!\w) sea",
-        r"(?<!\w)tipo(?!\w)",          # "tipo" como muletilla
-        r"(?<!\w)osea(?!\w)",          # sin espacio
+        r"(?<!\w)tipo(?!\w)",
+        r"(?<!\w)osea(?!\w)",
         r"básicamente",
         r"basicamente",
-        r"(?<!\w)igual(?!\w)",         # "igual" como muletilla
-        r"(?<!\w)eso(?!\w)",
-        r"(?<!\w)claro(?!\w)",
+        r"(?<!\w)igual(?!\w)",
         r"la verdad",
         r"en realidad",
     ]
-
     texto_lower = texto.lower()
     contador = 0
-
     for patron in muletillas:
         coincidencias = re.findall(patron, texto_lower)
         contador += len(coincidencias)
-
     return contador
 
 
@@ -137,7 +125,6 @@ def detectar_tartamudeo(texto):
 def evaluar_comportamiento_voz(duracion, pausa, velocidad, es_corta, muletillas, tartamudeo):
     resultado = {}
 
-    # NERVIOSISMO
     if pausa > 3 or muletillas > 4:
         resultado["nivel_nerviosismo"] = "Alto"
     elif pausa > 1.5 or muletillas > 2:
@@ -145,7 +132,6 @@ def evaluar_comportamiento_voz(duracion, pausa, velocidad, es_corta, muletillas,
     else:
         resultado["nivel_nerviosismo"] = "Bajo"
 
-    # FLUIDEZ
     if velocidad < 1 or tartamudeo > 2:
         resultado["fluidez"] = "Baja"
     elif velocidad < 2.5:
@@ -153,10 +139,8 @@ def evaluar_comportamiento_voz(duracion, pausa, velocidad, es_corta, muletillas,
     else:
         resultado["fluidez"] = "Alta"
 
-    # CLARIDAD
     resultado["claridad"] = "Respuesta poco desarrollada" if es_corta else "Explicación clara"
 
-    # SEGURIDAD
     if pausa > 2.5 or muletillas > 3:
         resultado["seguridad"] = "Baja"
     elif pausa > 1:
@@ -168,53 +152,41 @@ def evaluar_comportamiento_voz(duracion, pausa, velocidad, es_corta, muletillas,
 
 
 # ============================================
-# DETECTAR SI ES UN SALUDO
-# ============================================
-
-def es_saludo(texto):
-    """Detecta si el texto es principalmente un saludo sin contenido adicional."""
-    texto_lower = texto.lower().strip()
-    saludos = [
-        "hola", "buenos días", "buenas tardes", "buenas noches",
-        "buenas", "hey", "hi", "qué tal", "que tal", "cómo estás",
-        "como estas", "hola!", "hola,", "hey!", "hola buenas"
-    ]
-    # Si el texto es muy corto Y contiene un saludo, es solo saludo
-    palabras = texto_lower.split()
-    if len(palabras) <= 4:
-        for saludo in saludos:
-            if saludo in texto_lower:
-                return True
-    return False
-
-
-# ============================================
 # LIMPIAR TRANSCRIPCION
 # ============================================
 
 def limpiar_transcripcion(texto):
-    """Elimina timestamps tipo subtítulo."""
     texto = re.sub(r"\d{2}:\d{2}:\d{2}:\d{3}\s*-->\s*\d{2}:\d{2}:\d{2}:\d{3}", "", texto)
     texto = texto.replace("\n", " ").strip()
     return texto
 
 
 # ============================================
-# INICIAR ENTREVISTA
+# INICIAR ENTREVISTA — solo texto, sin audio
+# Se llama UNA sola vez al comenzar la sesión
 # ============================================
 
 def iniciar_entrevista_adso(nombre_estudiante):
+    """
+    Genera el saludo inicial de Luvani ANTES de que el candidato diga nada.
+    Llamar esto desde el endpoint de inicio de sesión, no desde el de audio.
+    """
     prompt = f"""
-    Eres un entrevistador de recursos humanos llamado Andrés, trabajas en una empresa de tecnología.
-    Vas a entrevistar a {nombre_estudiante}, un estudiante de Análisis y Desarrollo de Software (ADSO).
+    Eres Luvani, una entrevistadora de recursos humanos que trabaja en una empresa de tecnología.
+    Vas a entrevistar a {nombre_estudiante}, estudiante de Análisis y Desarrollo de Software (ADSO).
 
-    Empieza la entrevista de forma natural y humana:
-    - Salúdalo por su nombre
-    - Preséntate brevemente
-    - Di algo corto para romper el hielo (una frase, no más)
-    - Luego haz una primera pregunta sencilla para conocerlo (no técnica aún)
+    Este es el INICIO de la entrevista. El candidato aún no ha dicho nada.
 
-    Sé cálido, directo y natural. No uses listas ni puntos. Habla como una persona real.
+    Haz lo siguiente en orden:
+    1. Saluda a {nombre_estudiante} por su nombre de forma cálida.
+    2. Preséntate: di tu nombre (Luvani) y que eres del equipo de selección.
+    3. Explica brevemente que van a tener una conversación para conocerlo mejor.
+    4. Rompe el hielo con UNA frase corta y amigable.
+    5. Haz UNA sola pregunta inicial sencilla y personal (no técnica), por ejemplo
+       sobre cómo está, cómo llegó a estudiar ADSO, o qué le gusta del área.
+
+    Habla de corrido, como una persona real. Sin listas, sin bullets, sin formatos.
+    Máximo 4-5 oraciones en total. Sé cálida y natural.
     """
     response = model.generate_content(prompt)
     return response.text
@@ -226,8 +198,8 @@ def iniciar_entrevista_adso(nombre_estudiante):
 
 def generar_siguiente_pregunta(historial_conversacion, respuesta_estudiante):
     prompt = f"""
-    Eres Andrés, un entrevistador humano de recursos humanos en una empresa tech.
-    Estás haciendo una entrevista laboral a un candidato ADSO (Análisis y Desarrollo de Software).
+    Eres Luvani, entrevistadora de recursos humanos en una empresa tech.
+    Estás haciendo una entrevista laboral a un candidato ADSO.
 
     Historial de la conversación:
     {historial_conversacion}
@@ -236,11 +208,11 @@ def generar_siguiente_pregunta(historial_conversacion, respuesta_estudiante):
     "{respuesta_estudiante}"
 
     Tu tarea:
-    1. Haz un comentario breve y natural sobre lo que dijo (como lo haría una persona real).
+    1. Haz un comentario breve y natural sobre lo que dijo.
     2. Luego haz la siguiente pregunta. Puede ser personal, técnica, actitudinal o de proyectos.
-    3. No uses listas, bullets ni formatos. Solo texto natural.
+    3. Sin listas, bullets ni formatos. Solo texto natural.
     4. Varía los temas conforme avanza la conversación.
-    5. Sé cercano pero profesional.
+    5. Sé cercana pero profesional.
     """
     response = model.generate_content(prompt)
     return response.text
@@ -250,7 +222,16 @@ def generar_siguiente_pregunta(historial_conversacion, respuesta_estudiante):
 # PROCESAR AUDIO DE ENTREVISTA
 # ============================================
 
-def procesar_audio_entrevista(audio_path, historial_conversacion):
+def procesar_audio_entrevista(audio_path, historial_conversacion, es_primer_audio=False, nombre_estudiante=""):
+    """
+    Parámetros nuevos:
+    - es_primer_audio: True si es el primer mensaje de voz del candidato.
+    - nombre_estudiante: nombre del candidato, necesario solo si es_primer_audio=True.
+
+    Flujo:
+    - Si es_primer_audio=True: Luvani primero se presenta y luego responde al audio.
+    - Si es_primer_audio=False: flujo normal de conversación.
+    """
 
     analisis_audio = analizar_audio_basico(audio_path)
     pausa_maxima = detectar_pausas(audio_path)
@@ -263,30 +244,28 @@ def procesar_audio_entrevista(audio_path, historial_conversacion):
         "data": audio_data
     }
 
-    # Obtener la última pregunta del entrevistador para contexto
-    ultima_pregunta = ""
-    if historial_conversacion:
-        if isinstance(historial_conversacion, list):
-            # Buscar el último mensaje del entrevistador
-            for item in reversed(historial_conversacion):
-                if isinstance(item, dict) and item.get("rol") == "entrevistador":
-                    ultima_pregunta = item.get("mensaje", "")
-                    break
-                elif isinstance(item, str) and "Entrevistador:" in item:
-                    ultima_pregunta = item.split("Entrevistador:")[-1].strip()
-                    break
-        elif isinstance(historial_conversacion, str):
-            lineas = historial_conversacion.strip().split("\n")
-            for linea in reversed(lineas):
-                if "Entrevistador:" in linea or "Andrés:" in linea:
-                    ultima_pregunta = linea.split(":")[-1].strip()
-                    break
+    # Bloque de presentación: solo se incluye en el primer audio
+    bloque_presentacion = ""
+    if es_primer_audio:
+        bloque_presentacion = f"""
+    ⚠️ IMPORTANTE — PRIMER MENSAJE DEL CANDIDATO:
+    Este es el primer audio del candidato. Antes de responder a lo que dijo,
+    DEBES presentarte primero como Luvani:
+    - Saluda a {nombre_estudiante} por su nombre.
+    - Di que eres Luvani, del equipo de selección.
+    - Di que van a tener una conversación para conocerlo mejor.
+    - Luego responde naturalmente a lo que dijo el candidato.
+    - Cierra con UNA pregunta inicial sencilla y personal (no técnica aún).
+    Todo en máximo 5 oraciones, de corrido, sin listas.
+    """
 
     prompt = f"""
-    Eres Andrés, un entrevistador humano de recursos humanos en una empresa de tecnología.
-    Estás realizando una entrevista laboral a un candidato de ADSO (Análisis y Desarrollo de Software).
+    Eres Luvani, una entrevistadora humana de recursos humanos en una empresa de tecnología.
+    Estás realizando una entrevista laboral a un candidato de ADSO.
 
-    CONTEXTO DE LA CONVERSACIÓN:
+    {bloque_presentacion}
+
+    HISTORIAL DE LA CONVERSACIÓN:
     {historial_conversacion}
 
     DATOS DEL AUDIO:
@@ -294,29 +273,26 @@ def procesar_audio_entrevista(audio_path, historial_conversacion):
     - Pausa más larga detectada: {pausa_maxima} segundos
 
     TU PERSONALIDAD:
-    - Eres cercano, profesional y empático.
+    - Eres cercana, profesional y empática.
     - Hablas como una persona real, no como un robot.
     - Escuchas activamente y reaccionas a lo que dice el candidato.
     - Adaptas el tono: si el candidato está nervioso, lo tranquilizas.
-    - No usas listas, ni bullets, ni formatos raros. Solo texto natural.
+    - Sin listas, bullets ni formatos. Solo texto natural.
 
-    REGLAS CLAVE:
-    1. Si el candidato SOLO saluda (sin más contenido), responde al saludo de forma cálida
-       y luego haz UNA pregunta sencilla para romper el hielo. NO saltes a preguntas técnicas.
-    2. Si la respuesta es demasiado corta o vaga, pídele amablemente que desarrolle más,
-       como lo haría un entrevistador real ("Interesante, ¿podrías contarme un poco más sobre eso?").
-    3. Si la respuesta NO tiene nada que ver con la pregunta que hiciste, menciónalo de forma
-       natural y educada, como: "Mmm, creo que me fui por las ramas, te pregunté sobre X,
-       ¿me puedes hablar de eso?" — No seas brusco.
-    4. Si la respuesta tiene relación, haz un comentario breve y natural, y continúa con
-       la siguiente pregunta. No repitas la respuesta del candidato textualmente.
+    REGLAS DE CONVERSACIÓN:
+    1. Si el candidato SOLO saluda, respóndele el saludo con calidez y haz UNA pregunta
+       sencilla para romper el hielo. NO saltes a preguntas técnicas.
+    2. Si la respuesta es muy corta o vaga, pídele amablemente que amplíe más.
+    3. Si la respuesta no tiene nada que ver con la pregunta anterior, menciónalo con
+       naturalidad y redirige: "Creo que me perdí un poco, te había preguntado sobre X,
+       ¿me cuentas sobre eso?"
+    4. Si la respuesta es relevante, comenta brevemente y haz la siguiente pregunta.
     5. NUNCA hagas más de una pregunta a la vez.
-    6. Varía los temas: empieza con preguntas personales/motivacionales, luego técnicas,
-       luego de proyectos, luego actitudinales.
+    6. Progresión de temas: personal/motivacional → técnico → proyectos → actitudinal.
 
     TAREA:
     1. Transcribe EXACTAMENTE lo que dijo el candidato en el audio.
-    2. Genera tu respuesta como entrevistador (siguiendo las reglas anteriores).
+    2. Genera tu respuesta como Luvani (siguiendo todo lo anterior).
 
     Devuelve ÚNICAMENTE este JSON, sin texto adicional ni backticks:
     {{
@@ -329,7 +305,6 @@ def procesar_audio_entrevista(audio_path, historial_conversacion):
         response = model.generate_content([prompt, audio_part])
         clean_text = response.text.strip()
 
-        # Limpiar markdown si viene con backticks
         if clean_text.startswith("```json"):
             clean_text = clean_text[7:]
         elif clean_text.startswith("```"):
@@ -339,14 +314,11 @@ def procesar_audio_entrevista(audio_path, historial_conversacion):
 
         resultado = json.loads(clean_text.strip())
 
-        # Limpiar transcripción
         texto_usuario = resultado.get("transcripcion_usuario", "")
         texto_usuario = limpiar_transcripcion(texto_usuario)
         resultado["transcripcion_usuario"] = texto_usuario
 
-        # ============================================
-        # ANALISIS DE VOZ (solo para métricas internas)
-        # ============================================
+        # Métricas de voz
         velocidad = velocidad_respuesta(texto_usuario, analisis_audio["duracion"])
         es_corta = respuesta_corta(texto_usuario)
         muletillas_detectadas = detectar_muletillas(texto_usuario)
@@ -370,9 +342,6 @@ def procesar_audio_entrevista(audio_path, historial_conversacion):
             "posible_tartamudeo": tartamudeo_detectado,
             "evaluacion_comportamiento": evaluacion
         }
-
-        # NOTA: Ya NO sobreescribimos respuesta_entrevistador con mensajes hardcodeados.
-        # El LLM maneja todo el flujo conversacional de forma natural según las reglas del prompt.
 
         return resultado
 

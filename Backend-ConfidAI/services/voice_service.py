@@ -1,19 +1,28 @@
-from gtts import gTTS
 import os
 import uuid
+import asyncio
+import edge_tts
 
-# Crear carpeta temporal para audios si no existe
+# Crear carpetas necesarias
 os.makedirs("temp_audio", exist_ok=True)
 os.makedirs("static/audio", exist_ok=True)
 
-def texto_a_audio(texto):
+# Voz colombiana natural de Microsoft Edge
+VOZ = "es-CO-SalomeNeural"
+
+async def _generar_audio(texto: str, filepath: str):
+    communicate = edge_tts.Communicate(texto, voice=VOZ)
+    await communicate.save(filepath)
+
+def texto_a_audio(texto: str) -> str:
     """
-    Convierte el texto en voz utilizando Google TTS.
+    Convierte texto en voz usando Edge TTS (Microsoft).
+    Voz: es-CO-SalomeNeural (español colombiano, natural).
     Devuelve la ruta relativa al archivo generado.
     """
-    tts = gTTS(text=texto, lang='es')
     filename = f"response_{uuid.uuid4()}.mp3"
     filepath = f"static/audio/{filename}"
-    
-    tts.save(filepath)
+
+    asyncio.run(_generar_audio(texto, filepath))
+
     return filepath
