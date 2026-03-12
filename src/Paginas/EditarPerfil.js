@@ -137,7 +137,7 @@ const handleSubmit = (e) => {
           <div className="ep-eyebrow">GESTIÓN DE CUENTA</div>
           <h1 className="ep-title">Editar Perfil</h1>
           <p className="ep-subtitle">
-            Actualiza tu información personal y credenciales de acceso.
+            Actualiza tu información personal.
           </p>
 
           <div className="ep-avatar-row">
@@ -211,7 +211,7 @@ const handleSubmit = (e) => {
               </div>
 
               <div className="ep-group ep-group--full">
-                <label className="ep-label">Contraseña</label>
+                <label className="ep-label">Cambiar Contraseña</label>
                 <div className="ep-pwd-wrap">
                   <input
                     className="ep-input"

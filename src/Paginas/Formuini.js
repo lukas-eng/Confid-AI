@@ -37,7 +37,7 @@ const Formuini = () => {
       >
         <div className="formularioregis">
           <h1 className="tituloregis">Inicio de Sesión</h1>
-          <p className="tituloregis-sub">Plataforma ConfidAI · Acceso seguro</p>
+          <p className="tituloregis-sub">Plataforma ConfidAI</p>
 
           <form onSubmit={handleSubmit}>
             <div>

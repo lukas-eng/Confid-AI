@@ -8,6 +8,7 @@
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   position: relative;
 }
+
 .logout-btn{
   background: none;
   border: none;
@@ -23,6 +24,7 @@
 .logout-icon:hover{
   transform: scale(1.1);
 }
+
 .header-left {
   display: flex;
   align-items: center;
@@ -43,22 +45,11 @@
   height: 110px;
 }
 
-.logo-square {
-  width: 18px;
-  height: 18px;
-  background-color: #2b7de9;
-}
-
 .logo-text {
   font-size: 30px;
   margin-left: 10px;
   font-weight: bold;
   color: #333;
-}
-h5{
-  justify-content: center;
-  align-items: center;
-  margin-left: 7%;
 }
 
 .highlight {
@@ -87,6 +78,13 @@ h5{
   gap: 10px;
 }
 
+.profile-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
 .user-icon {
   font-size: 40px;
   color: #555;
@@ -104,6 +102,12 @@ h5{
   color: #141414;
 }
 
+h5{
+  justify-content: center;
+  align-items: center;
+  margin-left: 7%;
+}
+
 .menu-toggle {
   display: none;
   background: none;
@@ -113,8 +117,20 @@ h5{
   color: #333;
   z-index: 100;
 }
+.mobile-user{
+  display:none;
+}
 
+.mobile-user-info{
+  display:flex;
+  flex-direction:column;
+}
+
+.mobile-only{
+  display:none;
+}
 @media (max-width: 1024px) {
+
   .header {
     padding: 20px 30px;
   }
@@ -146,11 +162,13 @@ h5{
   }
 }
 @media (max-width: 768px) {
+
   .header {
     flex-wrap: wrap;
     padding: 14px 16px;
     gap: 10px;
   }
+
   .nav.open {
     display: flex;
   }
@@ -176,43 +194,79 @@ h5{
   .user-icon {
     font-size: 26px;
   }
+
   .logout-icon{
-  width: 35px;
-  height: 35px;
+    width: 35px;
+    height: 35px;
   }
 }
 @media (max-width: 480px) {
+
   .menu-toggle {
+    display: block;
     position: absolute;
-    top: 0;
-    right: 0;
-    text-align: right;
+    top: 20px;
+    right: 20px;
   }
+
+  .header-right {
+    display: none;
+  }
+
   .nav {
     display: none;
     flex-direction: column;
     width: 100%;
     background: white;
     border-top: 1px solid #ddd;
-    padding: 12px 0;
-    gap: 12px;
+    padding: 15px;
+    gap: 15px;
+  }
+
+  .nav.open {
+    display: flex;
+  }
+
+  .mobile-user{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    border-bottom:1px solid #ddd;
+    padding-bottom:10px;
+  }
+
+  .mobile-user-info span{
+    font-size:15px;
+  }
+
+  .mobile-user-info a{
+    font-size:13px;
+    text-decoration:none;
+    color:#2b7de9;
+  }
+
+  .mobile-only{
+    display:flex;
+    align-items:center;
+    gap:10px;
   }
 
   .header{
     padding: 20px 20px;
   }
+
   .logo-text {
     font-size: 20px;
   }
+
   .logito {
     width: 80px;
     height: 70px;
   }
-  .user-info {
-    display: none;
-  }
+
   .logout-icon{
-  width: 25px;
-  height: 25px;
+    width: 35px;
+    height: 35px;
   }
+
 }

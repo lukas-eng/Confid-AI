@@ -62,7 +62,9 @@ const Header = () => {
           <span>
             Hola, {(userName || "Usuario").charAt(0).toUpperCase() + (userName || "Usuario").slice(1)}
           </span>
-          <h5>Mi perfil</h5>
+          <Link to="/perfil" className="profile-link">
+            <h5>Ver perfil</h5>
+          </Link>
         </div>
       </div>
     </header>

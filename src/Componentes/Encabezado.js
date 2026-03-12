@@ -34,14 +34,14 @@ const Header = () => {
       }
     });
   };
-  
-  useEffect(() => {
-  const token = localStorage.getItem("token");
 
-  if (!token) {
-    window.location.href = "/";
-  }
-}, []);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      window.location.href = "/";
+    }
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -61,6 +61,7 @@ const Header = () => {
 
   return (
     <header className="header">
+
       <div className="header-left">
         <div className="logo">
           <img
@@ -69,35 +70,78 @@ const Header = () => {
             alt="logo"
           />
         </div>
+
         <h1 className="logo-text">
           Confid<span className="highlight">AI</span>
         </h1>
       </div>
 
+      {/* BOTON HAMBURGUESA */}
       <button
         className="menu-toggle"
         onClick={() => setMenuOpen(!menuOpen)}
-        aria-label="Abrir menú"
       >
         {menuOpen ? <FaTimes /> : <FaBars />}
       </button>
 
+      {/* MENU */}
       <nav className={`nav ${menuOpen ? "open" : ""}`}>
+
+        {/* PERFIL MOVIL */}
+        <div className="mobile-user">
+
+          <FaUserCircle className="user-icon" />
+
+          <div className="mobile-user-info">
+            <span>
+              Hola, {(userName || "Usuario").charAt(0).toUpperCase() +
+                (userName || "Usuario").slice(1)}
+            </span>
+
+            <Link to="/perfil" onClick={() => setMenuOpen(false)}>
+              Ver perfil
+            </Link>
+          </div>
+
+        </div>
+
         <Link to="/resultados" onClick={() => setMenuOpen(false)}>
           Mis Resultados
         </Link>
+
+        <button
+          className="logout-btn mobile-only"
+          onClick={() => {
+            setMenuOpen(false);
+            cerrarSesion();
+          }}
+        >
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/3168/3168147.png"
+            alt="cerrar sesion"
+            className="logout-icon"
+          />
+          Cerrar sesión
+        </button>
+
       </nav>
 
+      {/* PANEL DERECHO ESCRITORIO */}
       <div className="header-right">
+
         <Link to="/perfil" className="profile-link">
           <FaUserCircle className="user-icon" />
         </Link>
 
         <div className="user-info">
           <span>
-            Hola, {(userName || "Usuario").charAt(0).toUpperCase() + (userName || "Usuario").slice(1)}
+            Hola, {(userName || "Usuario").charAt(0).toUpperCase() +
+              (userName || "Usuario").slice(1)}
           </span>
-          <h5>Mi perfil</h5>
+
+          <Link to="/perfil" className="profile-link">
+            <h5>Ver perfil</h5>
+          </Link>
         </div>
 
         <button className="logout-btn" onClick={cerrarSesion}>
@@ -107,7 +151,9 @@ const Header = () => {
             className="logout-icon"
           />
         </button>
+
       </div>
+
     </header>
   );
 };

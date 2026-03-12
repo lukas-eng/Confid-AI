@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { enviarRespuestaVoz } from '../Services/InterviewService';
 import "../Style/Avatar.css";
+import * as faceapi from "face-api.js";
 
 const Avatar = () => {
 
@@ -15,12 +16,54 @@ const Avatar = () => {
     const audioPlayerRef = useRef(null);
     const localVideoRef = useRef(null);
     const [cameraError, setCameraError] = useState(false);
+    const intervalRef = useRef(null);
 
     // IMÁGENES DEL MICRÓFONO (DESDE INTERNET)
     const micImages = {
         idle: "https://cdn.pixabay.com/photo/2022/10/06/12/14/microphone-7502540_1280.png",
         listening: "https://cdn-icons-png.flaticon.com/512/1828/1828843.png"
     };
+    const iniciarAnalisis = () => {
+        console.log("Analisis iniciado");
+
+
+    if (intervalRef.current) return; // evita duplicados
+
+
+    intervalRef.current = setInterval(async () => {
+
+        const video = localVideoRef.current;
+if (
+    !video ||
+    video.readyState !== 4 ||
+    !video.videoWidth ||
+    !video.videoHeight
+) {
+    console.log("Video aún no listo");
+    return;
+}
+        try {
+
+            const deteccion = await faceapi
+                .detectSingleFace(
+                    video,
+                    new faceapi.TinyFaceDetectorOptions({
+                        inputSize: 416,
+                        scoreThreshold: 0.3
+                    })
+                )
+                .withFaceExpressions();
+
+            if (!deteccion) return;
+
+            console.log("Emociones:", deteccion.expressions);
+
+        } catch (err) {
+            return;
+        }
+
+    }, 2000);
+};
 
     // Activar camara web al entrar a la entrevista
     useEffect(() => {
@@ -29,6 +72,7 @@ const Avatar = () => {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 if (localVideoRef.current) {
                     localVideoRef.current.srcObject = stream;
+                    
                 }
             } catch (err) {
                 console.error("No se pudo acceder a la cámara:", err);
@@ -38,12 +82,39 @@ const Avatar = () => {
         initCamera();
 
         return () => {
-            if (localVideoRef.current && localVideoRef.current.srcObject) {
-                const tracks = localVideoRef.current.srcObject.getTracks();
-                tracks.forEach(track => track.stop());
-            }
-        };
+
+    if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+    }
+
+    if (localVideoRef.current && localVideoRef.current.srcObject) {
+        const tracks = localVideoRef.current.srcObject.getTracks();
+        tracks.forEach(track => track.stop());
+    }
+};
+        
     }, []);
+    useEffect(() => {
+
+    const cargarModelos = async () => {
+
+        await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
+        await faceapi.nets.faceExpressionNet.loadFromUri("/models");
+        console.log("Modelos cargados");
+
+        const video = localVideoRef.current;
+
+        if (video) {
+            video.addEventListener("loadeddata", () => {
+                
+            });
+        }
+
+    };
+
+    cargarModelos();
+
+}, []);
 
     // Auto-scroll chat
     useEffect(() => {
@@ -229,13 +300,14 @@ const Avatar = () => {
                 {/* USUARIO */}
                 <div className="video-pane user-pane">
 
-                    <video
-                        ref={localVideoRef}
-                        autoPlay
-                        playsInline
-                        muted
-                        className="pane-video-feed"
-                    />
+                <video
+                ref={localVideoRef}
+                autoPlay
+                playsInline
+                muted
+                className="pane-video-feed"
+                onLoadedData={iniciarAnalisis}
+                />
 
                     {cameraError && (
                         <div className="camera-error-overlay">
