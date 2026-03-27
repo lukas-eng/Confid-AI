@@ -7,7 +7,6 @@ import edge_tts
 os.makedirs("temp_audio", exist_ok=True)
 os.makedirs("static/audio", exist_ok=True)
 
-# Voz colombiana natural de Microsoft Edge
 VOZ = "es-CO-SalomeNeural"
 
 async def _generar_audio(texto: str, filepath: str):
@@ -15,14 +14,20 @@ async def _generar_audio(texto: str, filepath: str):
     await communicate.save(filepath)
 
 def texto_a_audio(texto: str) -> str:
-    """
-    Convierte texto en voz usando Edge TTS (Microsoft).
-    Voz: es-CO-SalomeNeural (español colombiano, natural).
-    Devuelve la ruta relativa al archivo generado.
-    """
     filename = f"response_{uuid.uuid4()}.mp3"
     filepath = f"static/audio/{filename}"
 
-    asyncio.run(_generar_audio(texto, filepath))
+    try:
+        # Si ya hay un loop corriendo (FastAPI), úsalo
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as pool:
+                future = pool.submit(asyncio.run, _generar_audio(texto, filepath))
+                future.result()
+        else:
+            loop.run_until_complete(_generar_audio(texto, filepath))
+    except RuntimeError:
+        asyncio.run(_generar_audio(texto, filepath))
 
     return filepath

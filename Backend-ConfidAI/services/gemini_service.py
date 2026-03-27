@@ -1,25 +1,24 @@
-import google.generativeai as genai
+from groq import Groq
 import os
 import json
 from dotenv import load_dotenv
 import librosa
 import numpy as np
 import re
+from concurrent.futures import ThreadPoolExecutor
 
 # ============================================
-# CONFIGURAR GEMINI
+# CONFIGURAR GROQ
 # ============================================
 
 load_dotenv()
 
-mi_api_key = os.getenv("GEMINI_API_KEY")
+groq_api_key = os.getenv("GROQ_API_KEY")
 
-if not mi_api_key:
-    raise ValueError("🚨 ALERTA: No se encontró GEMINI_API_KEY. Revisa tu archivo .env")
+if not groq_api_key:
+    raise ValueError("🚨 ALERTA: No se encontró GROQ_API_KEY. Revisa tu archivo .env")
 
-genai.configure(api_key=mi_api_key)
-
-model = genai.GenerativeModel('gemini-2.0-flash')
+client = Groq(api_key=groq_api_key)
 
 
 # ============================================
@@ -162,15 +161,165 @@ def limpiar_transcripcion(texto):
 
 
 # ============================================
+# BANCO DE PREGUNTAS POR FASE
+#
+#  Fase 1 — PERSONAL     : min  0 →  3  (seg 900 → 720)  ~2 preguntas
+#  Fase 2 — MOTIVACIONAL : min  3 →  6  (seg 720 → 540)  ~2 preguntas
+#  Fase 3 — TÉCNICA      : min  6 → 10  (seg 540 → 300)  ~3 preguntas
+#  Fase 4 — PROYECTOS    : min 10 → 13  (seg 300 → 120)  ~2 preguntas
+#  Fase 5 — ACTITUDINAL  : min 13 → 14  (seg 120 →  60)  ~1-2 preguntas
+#  CIERRE                : últimos 60s  — despedida
+# ============================================
+
+BANCO_PREGUNTAS = {
+
+    "personal": [
+        "¿Qué fue lo que te llevó a elegir la carrera de Análisis y Desarrollo de Software?",
+        "¿Cómo describirías tu trayectoria hasta llegar a estudiar ADSO?",
+        "¿Qué es lo que más te gusta del área de desarrollo de software?",
+        "¿Tienes algún referente o persona que haya influido en tu interés por la tecnología?",
+        "¿Cómo equilibras tus estudios con otras responsabilidades o actividades?",
+    ],
+
+    "motivacional": [
+        "¿Por qué te interesa trabajar en una empresa de tecnología?",
+        "¿Dónde te ves profesionalmente en los próximos dos o tres años?",
+        "¿Qué tipo de proyectos o retos te gustaría enfrentar en tu primer empleo?",
+        "¿Qué te motivó a postularte a esta posición en particular?",
+        "¿Qué esperas aprender en un entorno laboral que no puedas aprender en la academia?",
+    ],
+
+    "tecnica": [
+        "¿Con qué lenguajes de programación te sientes más cómodo trabajando actualmente?",
+        "¿Puedes explicarme qué es una API REST y para qué se usa?",
+        "¿Cuál es la diferencia entre una base de datos relacional y una no relacional?",
+        "¿Qué herramientas de control de versiones has usado? ¿Cómo describes tu experiencia con Git?",
+        "¿Qué es el patrón MVC y en qué situaciones lo has aplicado?",
+        "¿Cómo manejarías un error inesperado en producción que afecta a los usuarios?",
+        "¿Qué frameworks o librerías has explorado por tu cuenta fuera de la academia?",
+        "¿Qué entiendes por código limpio y por qué es importante?",
+    ],
+
+    "proyectos": [
+        "¿Puedes contarme sobre algún proyecto académico o personal que hayas desarrollado?",
+        "¿Cuál ha sido el proyecto más complejo en el que has participado y cuál fue tu rol?",
+        "¿Has trabajado en equipo para desarrollar software? ¿Cómo fue esa experiencia?",
+        "¿Alguna vez tuviste que resolver un problema técnico difícil en un proyecto? ¿Qué hiciste?",
+        "¿Tienes proyectos personales, repositorios en GitHub o algo que hayas construido por iniciativa propia?",
+    ],
+
+    "actitudinal": [
+        "¿Cómo reaccionas cuando recibes una crítica sobre tu trabajo o tu código?",
+        "¿Qué haces cuando te atascas en un problema y no encuentras la solución?",
+        "¿Cómo te adaptas cuando cambian los requisitos de un proyecto en medio del desarrollo?",
+        "¿Prefieres trabajar de forma independiente o en equipo? ¿Por qué?",
+        "¿Cómo manejas la presión cuando tienes varios entregables al mismo tiempo?",
+        "¿Qué harías si no estás de acuerdo con una decisión técnica tomada por tu equipo?",
+    ],
+}
+
+
+# ============================================
+# DETERMINAR FASE SEGÚN TIEMPO RESTANTE
+# ============================================
+
+def _determinar_fase(segundos_restantes: int) -> dict:
+    if segundos_restantes > 720:
+        return {
+            "nombre": "PERSONAL",
+            "numero": 1,
+            "rango": "minutos 0 a 3",
+            "objetivo": "Romper el hielo y conocer al candidato como persona",
+            "preguntas": BANCO_PREGUNTAS["personal"]
+        }
+    elif segundos_restantes > 540:
+        return {
+            "nombre": "MOTIVACIONAL",
+            "numero": 2,
+            "rango": "minutos 3 a 6",
+            "objetivo": "Entender sus motivaciones, metas y expectativas laborales",
+            "preguntas": BANCO_PREGUNTAS["motivacional"]
+        }
+    elif segundos_restantes > 300:
+        return {
+            "nombre": "TÉCNICA",
+            "numero": 3,
+            "rango": "minutos 6 a 10",
+            "objetivo": "Evaluar conocimientos técnicos de programación y herramientas",
+            "preguntas": BANCO_PREGUNTAS["tecnica"]
+        }
+    elif segundos_restantes > 120:
+        return {
+            "nombre": "PROYECTOS",
+            "numero": 4,
+            "rango": "minutos 10 a 13",
+            "objetivo": "Conocer su experiencia práctica y trabajo en equipo",
+            "preguntas": BANCO_PREGUNTAS["proyectos"]
+        }
+    else:
+        return {
+            "nombre": "ACTITUDINAL",
+            "numero": 5,
+            "rango": "minutos 13 a 14",
+            "objetivo": "Evaluar comportamiento, valores y soft skills",
+            "preguntas": BANCO_PREGUNTAS["actitudinal"]
+        }
+
+
+# ============================================
+# BLOQUE DE FASE PARA EL PROMPT
+# ============================================
+
+def _bloque_fase(segundos_restantes: int) -> str:
+    fase = _determinar_fase(segundos_restantes)
+    preguntas_formateadas = "\n".join(f"  - {p}" for p in fase["preguntas"])
+
+    return f"""
+📋 FASE ACTUAL: {fase["numero"]}/5 — {fase["nombre"]} ({fase["rango"]})
+Objetivo de esta fase: {fase["objetivo"]}
+
+PREGUNTAS DISPONIBLES — elige UNA que aún no hayas hecho en esta conversación:
+{preguntas_formateadas}
+
+INSTRUCCIÓN IMPORTANTE:
+- Elige la pregunta que mejor fluya con lo que acaba de decir el candidato.
+- Puedes reformularla ligeramente para que suene natural, pero sin cambiar su esencia.
+- NO hagas preguntas de otras fases ni inventes preguntas fuera de esta lista.
+- Si ya hiciste todas las preguntas de esta lista, haz una pregunta de profundización
+  sobre algo que el candidato mencionó antes.
+- NUNCA hagas más de una pregunta a la vez.
+"""
+
+
+# ============================================
+# BLOQUE DE TIEMPO PARA EL PROMPT
+# ============================================
+
+def _bloque_tiempo(segundos_restantes: int) -> str:
+    if segundos_restantes <= 60:
+        return """
+⏰ CIERRE OBLIGATORIO — Queda menos de 1 minuto de entrevista.
+- NO hagas más preguntas bajo ninguna circunstancia.
+- Agradece al candidato brevemente por su tiempo y disposición.
+- Dile que el equipo revisará su perfil y que estarán en contacto pronto.
+- Despídete de forma cordial y natural. Máximo 3 oraciones en total.
+"""
+    elif segundos_restantes <= 180:
+        return """
+⏰ AVISO — Quedan menos de 3 minutos de entrevista.
+Ve cerrando la conversación con naturalidad.
+Puedes hacer máximo UNA pregunta más antes de despedirte.
+No abras temas nuevos.
+"""
+    else:
+        return ""
+
+
+# ============================================
 # INICIAR ENTREVISTA — solo texto, sin audio
-# Se llama UNA sola vez al comenzar la sesión
 # ============================================
 
 def iniciar_entrevista_adso(nombre_estudiante):
-    """
-    Genera el saludo inicial de Luvani ANTES de que el candidato diga nada.
-    Llamar esto desde el endpoint de inicio de sesión, no desde el de audio.
-    """
     prompt = f"""
     Eres Luvani, una entrevistadora de recursos humanos que trabaja en una empresa de tecnología.
     Vas a entrevistar a {nombre_estudiante}, estudiante de Análisis y Desarrollo de Software (ADSO).
@@ -178,18 +327,24 @@ def iniciar_entrevista_adso(nombre_estudiante):
     Este es el INICIO de la entrevista. El candidato aún no ha dicho nada.
 
     Haz lo siguiente en orden:
-    1. Saluda a {nombre_estudiante} por su nombre de forma cálida.
+    1. Saluda a {nombre_estudiante} por su nombre de forma cordial pero profesional.
     2. Preséntate: di tu nombre (Luvani) y que eres del equipo de selección.
     3. Explica brevemente que van a tener una conversación para conocerlo mejor.
-    4. Rompe el hielo con UNA frase corta y amigable.
-    5. Haz UNA sola pregunta inicial sencilla y personal (no técnica), por ejemplo
-       sobre cómo está, cómo llegó a estudiar ADSO, o qué le gusta del área.
+    4. Haz UNA sola pregunta inicial sencilla y personal (no técnica), por ejemplo
+       sobre cómo llegó a estudiar ADSO o qué le gusta del área.
 
-    Habla de corrido, como una persona real. Sin listas, sin bullets, sin formatos.
-    Máximo 4-5 oraciones en total. Sé cálida y natural.
+    Habla de corrido, como una persona real en un contexto laboral. Sin listas, sin bullets, sin formatos.
+    Máximo 4-5 oraciones en total. Sé cordial y profesional, sin exagerar el entusiasmo.
+    Evita frases muy efusivas como "¡Qué gusto conocerte!" o "¡Estoy muy emocionada!".
     """
-    response = model.generate_content(prompt)
-    return response.text
+
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=300
+    )
+
+    return response.choices[0].message.content
 
 
 # ============================================
@@ -208,59 +363,87 @@ def generar_siguiente_pregunta(historial_conversacion, respuesta_estudiante):
     "{respuesta_estudiante}"
 
     Tu tarea:
-    1. Haz un comentario breve y natural sobre lo que dijo.
+    1. Haz un comentario breve y neutral sobre lo que dijo (sin exagerar ni ser efusiva).
     2. Luego haz la siguiente pregunta. Puede ser personal, técnica, actitudinal o de proyectos.
     3. Sin listas, bullets ni formatos. Solo texto natural.
     4. Varía los temas conforme avanza la conversación.
-    5. Sé cercana pero profesional.
+    5. Sé cordial pero profesional. No efusiva.
+    6. Evita frases como "¡Qué bien!", "¡Excelente!" o cualquier reacción exagerada.
     """
-    response = model.generate_content(prompt)
-    return response.text
+
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=300
+    )
+
+    return response.choices[0].message.content
 
 
 # ============================================
 # PROCESAR AUDIO DE ENTREVISTA
 # ============================================
 
-def procesar_audio_entrevista(audio_path, historial_conversacion, es_primer_audio=False, nombre_estudiante=""):
-    """
-    Parámetros nuevos:
-    - es_primer_audio: True si es el primer mensaje de voz del candidato.
-    - nombre_estudiante: nombre del candidato, necesario solo si es_primer_audio=True.
+def procesar_audio_entrevista(
+    audio_path,
+    historial_conversacion,
+    es_primer_audio=False,
+    nombre_estudiante="",
+    segundos_restantes=900
+):
 
-    Flujo:
-    - Si es_primer_audio=True: Luvani primero se presenta y luego responde al audio.
-    - Si es_primer_audio=False: flujo normal de conversación.
-    """
+    # PASO 1: Análisis de audio y transcripción EN PARALELO
+    def transcribir():
+        with open(audio_path, "rb") as f:
+            return client.audio.transcriptions.create(
+                model="whisper-large-v3",
+                file=f,
+                response_format="text"
+            )
 
-    analisis_audio = analizar_audio_basico(audio_path)
-    pausa_maxima = detectar_pausas(audio_path)
+    def analizar():
+        return analizar_audio_basico(audio_path)
 
-    with open(audio_path, "rb") as f:
-        audio_data = f.read()
+    def pausas():
+        return detectar_pausas(audio_path)
 
-    audio_part = {
-        "mime_type": "audio/webm",
-        "data": audio_data
-    }
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        fut_transcripcion = executor.submit(transcribir)
+        fut_analisis      = executor.submit(analizar)
+        fut_pausas        = executor.submit(pausas)
 
-    # Bloque de presentación: solo se incluye en el primer audio
+        transcripcion  = fut_transcripcion.result()
+        analisis_audio = fut_analisis.result()
+        pausa_maxima   = fut_pausas.result()
+
+    texto_usuario = limpiar_transcripcion(transcripcion)
+
+    # PASO 2: Construir bloques dinámicos del prompt
+
     bloque_presentacion = ""
     if es_primer_audio:
         bloque_presentacion = f"""
     ⚠️ IMPORTANTE — PRIMER MENSAJE DEL CANDIDATO:
     Este es el primer audio del candidato. Antes de responder a lo que dijo,
     DEBES presentarte primero como Luvani:
-    - Saluda a {nombre_estudiante} por su nombre.
+    - Saluda a {nombre_estudiante} por su nombre de forma cordial.
     - Di que eres Luvani, del equipo de selección.
     - Di que van a tener una conversación para conocerlo mejor.
     - Luego responde naturalmente a lo que dijo el candidato.
     - Cierra con UNA pregunta inicial sencilla y personal (no técnica aún).
-    Todo en máximo 5 oraciones, de corrido, sin listas.
+    Todo en máximo 5 oraciones, de corrido, sin listas. Sin exagerar el entusiasmo.
     """
 
+    bloque_tiempo = _bloque_tiempo(segundos_restantes)
+    bloque_fase   = _bloque_fase(segundos_restantes) if segundos_restantes > 60 else ""
+
+    # Log de fase en terminal
+    if segundos_restantes > 60:
+        fase_actual = _determinar_fase(segundos_restantes)
+        print(f"📋 FASE ACTIVA: {fase_actual['numero']}/5 — {fase_actual['nombre']} ({fase_actual['rango']})")
+
     prompt = f"""
-    Eres Luvani, una entrevistadora humana de recursos humanos en una empresa de tecnología.
+    Eres Luvani, una entrevistadora de recursos humanos en una empresa de tecnología.
     Estás realizando una entrevista laboral a un candidato de ADSO.
 
     {bloque_presentacion}
@@ -272,68 +455,73 @@ def procesar_audio_entrevista(audio_path, historial_conversacion, es_primer_audi
     - Duración de la respuesta: {analisis_audio["duracion"]} segundos
     - Pausa más larga detectada: {pausa_maxima} segundos
 
+    LO QUE DIJO EL CANDIDATO:
+    "{texto_usuario}"
+
+    {bloque_fase}
+
+    {bloque_tiempo}
+
     TU PERSONALIDAD:
-    - Eres cercana, profesional y empática.
-    - Hablas como una persona real, no como un robot.
-    - Escuchas activamente y reaccionas a lo que dice el candidato.
-    - Adaptas el tono: si el candidato está nervioso, lo tranquilizas.
+    - Eres profesional, cordial y directa.
+    - Hablas como una persona real en un contexto laboral formal.
+    - Escuchas lo que dice el candidato y respondes de forma natural, sin exagerar reacciones.
+    - Si el candidato está nervioso o no sabe qué responder, lo reconoces brevemente
+      con una frase corta ("No te preocupes, tómate tu tiempo" o "Tranquilo, no hay
+      apuro") y sigues adelante. No profundices en ello ni lo conviertas en un momento
+      emocional.
     - Sin listas, bullets ni formatos. Solo texto natural.
 
     REGLAS DE CONVERSACIÓN:
-    1. Si el candidato SOLO saluda, respóndele el saludo con calidez y haz UNA pregunta
-       sencilla para romper el hielo. NO saltes a preguntas técnicas.
-    2. Si la respuesta es muy corta o vaga, pídele amablemente que amplíe más.
-    3. Si la respuesta no tiene nada que ver con la pregunta anterior, menciónalo con
-       naturalidad y redirige: "Creo que me perdí un poco, te había preguntado sobre X,
-       ¿me cuentas sobre eso?"
-    4. Si la respuesta es relevante, comenta brevemente y haz la siguiente pregunta.
+    1. Si el candidato SOLO saluda, respóndele el saludo de forma cordial y haz UNA
+       pregunta sencilla para romper el hielo. NO saltes a preguntas técnicas.
+    2. Si la respuesta es muy corta o vaga, pídele que amplíe con una frase simple
+       y neutral ("¿Puedes contarme un poco más sobre eso?").
+    3. Si la respuesta no tiene nada que ver con la pregunta anterior, redirige con
+       naturalidad y sin drama.
+    4. Si el candidato dice que está nervioso o que no sabe qué responder, dile
+       algo breve y neutro como "No te preocupes, tómate tu tiempo" o "Tranquilo,
+       es normal" — y luego repite o reformula la pregunta. No hagas más comentarios
+       sobre eso.
     5. NUNCA hagas más de una pregunta a la vez.
-    6. Progresión de temas: personal/motivacional → técnico → proyectos → actitudinal.
+    6. NUNCA uses frases muy efusivas como "¡Qué interesante!", "¡Excelente respuesta!"
+       o "¡Me alegra mucho escuchar eso!". Reacciona con naturalidad y mesura.
+    7. SIEMPRE respeta la fase activa. No mezcles categorías entre fases.
 
-    TAREA:
-    1. Transcribe EXACTAMENTE lo que dijo el candidato en el audio.
-    2. Genera tu respuesta como Luvani (siguiendo todo lo anterior).
-
-    Devuelve ÚNICAMENTE este JSON, sin texto adicional ni backticks:
-    {{
-        "transcripcion_usuario": "",
-        "respuesta_entrevistador": ""
-    }}
+    Responde ÚNICAMENTE con tu respuesta como Luvani, sin explicaciones adicionales.
     """
 
-    try:
-        response = model.generate_content([prompt, audio_part])
-        clean_text = response.text.strip()
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=400
+    )
 
-        if clean_text.startswith("```json"):
-            clean_text = clean_text[7:]
-        elif clean_text.startswith("```"):
-            clean_text = clean_text[3:]
-        if clean_text.endswith("```"):
-            clean_text = clean_text[:-3]
+    respuesta_luvani = response.choices[0].message.content
 
-        resultado = json.loads(clean_text.strip())
+    # PASO 3: Métricas
+    velocidad = velocidad_respuesta(texto_usuario, analisis_audio["duracion"])
+    es_corta = respuesta_corta(texto_usuario)
+    muletillas_detectadas = detectar_muletillas(texto_usuario)
+    tartamudeo_detectado = detectar_tartamudeo(texto_usuario)
 
-        texto_usuario = resultado.get("transcripcion_usuario", "")
-        texto_usuario = limpiar_transcripcion(texto_usuario)
-        resultado["transcripcion_usuario"] = texto_usuario
+    evaluacion = evaluar_comportamiento_voz(
+        analisis_audio["duracion"],
+        pausa_maxima,
+        velocidad,
+        es_corta,
+        muletillas_detectadas,
+        tartamudeo_detectado
+    )
 
-        # Métricas de voz
-        velocidad = velocidad_respuesta(texto_usuario, analisis_audio["duracion"])
-        es_corta = respuesta_corta(texto_usuario)
-        muletillas_detectadas = detectar_muletillas(texto_usuario)
-        tartamudeo_detectado = detectar_tartamudeo(texto_usuario)
+    entrevista_finalizada = segundos_restantes <= 60
 
-        evaluacion = evaluar_comportamiento_voz(
-            analisis_audio["duracion"],
-            pausa_maxima,
-            velocidad,
-            es_corta,
-            muletillas_detectadas,
-            tartamudeo_detectado
-        )
-
-        resultado["analisis_voz"] = {
+    return {
+        "transcripcion_usuario": texto_usuario,
+        "respuesta_entrevistador": respuesta_luvani,
+        "entrevista_finalizada": entrevista_finalizada,
+        "fase_actual": _determinar_fase(segundos_restantes)["nombre"] if segundos_restantes > 60 else "CIERRE",
+        "analisis_voz": {
             "duracion_respuesta": analisis_audio["duracion"],
             "pausa_maxima": pausa_maxima,
             "velocidad_palabras_segundo": velocidad,
@@ -342,10 +530,4 @@ def procesar_audio_entrevista(audio_path, historial_conversacion, es_primer_audi
             "posible_tartamudeo": tartamudeo_detectado,
             "evaluacion_comportamiento": evaluacion
         }
-
-        return resultado
-
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        raise e
+    }
