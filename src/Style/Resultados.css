@@ -2,7 +2,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 @keyframes orb-move {
   0%, 100% { transform: translate(0, 0); }
@@ -120,9 +120,9 @@
   background: linear-gradient(135deg, #0057ff, rgb(0, 132, 255));
   color: white;
   border: none;
-  padding: 12px 28px;
+  padding: 15px 38px;
   border-radius: 50px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.5px;
   cursor: pointer;

@@ -1,5 +1,5 @@
 *{
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -378,4 +378,37 @@ object-fit:contain;
   gap:1rem;
   z-index:100;
   backdrop-filter:blur(10px);
+}
+
+.mouth-animation{
+
+    position: absolute;
+
+    width: 70px;
+    height: 18px;
+
+    background: #7a1f1f;
+
+    border-radius: 20px;
+
+    bottom: 110px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    animation: talking 0.25s infinite alternate;
+
+}
+
+/* animación de hablar */
+
+@keyframes talking{
+
+    from{
+        height: 10px;
+    }
+
+    to{
+        height: 28px;
+    }
+
 }

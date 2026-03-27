@@ -71,22 +71,7 @@ export default function PaginaPrincipal() {
             alt="IA"
           />
         </div>
-
-        <div className="principal-cartas">
-          <div className="carta" data-stat="progress">
-            <strong>Última Sesión</strong>
-            <p>Hace 2 días · 78/100 (Confianza)</p>
-          </div>
-          <div className="carta">
-            <strong>Entrevistas Completadas</strong>
-            <p>4 Sesiones (Nivel Inicial)</p>
-          </div>
-          <div className="carta">
-            <strong>Área Principal a Mejorar</strong>
-            <p>Manejo de la Ansiedad (Nerviosismo)</p>
-          </div>
         </div>
       </div>
-    </div>
   );
 }

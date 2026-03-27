@@ -1,8 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import "../Style/EditarPerfil.css";
 
-
-
 const EyeIcon = ({ open }) =>
   open ? (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -42,15 +40,27 @@ const EditarPerfil = () => {
     password: "",
     confirmPassword: ""
   });
+
+  const getStoredToken = () => {
+    return localStorage.getItem("token") || localStorage.getItem("access_token");
+  };
 useEffect(() => {
-  const token = localStorage.getItem("token");
+  const token = getStoredToken();
 
   if (!token) {
+    alert("Token no encontrado. Por favor inicia sesión.");
     window.location.href = "/";
+    return;
   }
 }, []);
 useEffect(() => {
-  const token = localStorage.getItem("token");
+  const token = getStoredToken();
+
+  if (!token) {
+    alert("Token no encontrado. Por favor inicia sesión.");
+    window.location.href = "/";
+    return;
+  }
 
   fetch("http://127.0.0.1:8000/usuarios/perfil", {
     method: "GET",
@@ -58,8 +68,23 @@ useEffect(() => {
       "Authorization": `Bearer ${token}`
     }
   })
-    .then(res => res.json())
-    .then(data => {
+    .then(async (res) => {
+      if (res.status === 401) {
+        alert("Token inválido o expirado. Por favor ingresa de nuevo.");
+        localStorage.removeItem("token");
+        localStorage.removeItem("access_token");
+        window.location.href = "/";
+        return;
+      }
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error("Error cargando perfil:", data);
+        alert(data.detail || data.error || "No se pudo cargar perfil");
+        return;
+      }
+
       setFormData({
         firstName: data.nombre || "",
         lastName: data.apellido || "",
@@ -68,7 +93,10 @@ useEffect(() => {
         confirmPassword: ""
       });
     })
-    .catch(err => console.error("Error cargando perfil:", err));
+    .catch(err => {
+      console.error("Error cargando perfil:", err);
+      alert("Ocurrió un error de red al cargar perfil");
+    });
 }, []);
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -85,36 +113,72 @@ useEffect(() => {
     }
   };
 
-const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
 
- 
   if (formData.password !== formData.confirmPassword) {
     alert("Las contraseñas no coinciden");
-    return; 
+    return;
   }
 
   const token = localStorage.getItem("token");
+  if (!token) {
+    alert("No se encontró sesión activa. Por favor inicia sesión de nuevo.");
+    return;
+  }
 
-  fetch("http://127.0.0.1:8000/usuarios/perfil", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`
-    },
-    body: JSON.stringify({
-      nombre: formData.firstName,
-      apellido: formData.lastName,
-      correo: formData.email,
-      password: formData.password
-    })
-  })
-    .then(res => res.json())
-    .then(data => {
-      console.log("Perfil actualizado:", data);
-      alert("Perfil actualizado correctamente");
-    })
-    .catch(err => console.error("Error actualizando:", err));
+  const payload = {
+    nombre: formData.firstName,
+    apellido: formData.lastName,
+    correo: formData.email,
+  };
+
+  if (formData.password) {
+    payload.password = formData.password;
+  }
+
+  try {
+    const res = await fetch("http://127.0.0.1:8000/usuarios/perfil", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.status === 401) {
+      alert("Token inválido o expirado. Por favor ingresa de nuevo.");
+      localStorage.removeItem("token");
+      localStorage.removeItem("access_token");
+      window.location.href = "/";
+      return;
+    }
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Error actualizando perfil:", data);
+      alert(data.detail || data.error || "Error al actualizar el perfil");
+      return;
+    }
+
+    console.log("Perfil actualizado:", data);
+    alert("Perfil actualizado correctamente");
+
+    // Actualiza el estado local con los cambios para reflejarlos inmediatamente
+    setFormData((prev) => ({
+      ...prev,
+      firstName: payload.nombre,
+      lastName: payload.apellido,
+      email: payload.correo,
+      password: "",
+      confirmPassword: ""
+    }));
+  } catch (err) {
+    console.error("Error actualizando:", err);
+    alert("Ocurrió un error de red al actualizar el perfil");
+  }
 };
 
   return (
